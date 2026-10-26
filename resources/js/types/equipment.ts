@@ -17,3 +17,12 @@ export type Option<T extends string = string> = {
     value: T;
     label: string;
 };
+
+/** A booking as listed on an equipment page. Times are ISO 8601 (UTC). */
+export type EquipmentBooking = {
+    id: number;
+    title: string;
+    starts_at: string;
+    ends_at: string;
+    owner: { id: number; name: string };
+};

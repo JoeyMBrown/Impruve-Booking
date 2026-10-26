@@ -6,7 +6,10 @@ use App\Enums\EquipmentCategory;
 use App\Enums\EquipmentStatus;
 use App\Http\Requests\StoreEquipmentRequest;
 use App\Http\Requests\UpdateEquipmentRequest;
+use App\Models\Booking;
 use App\Models\Equipment;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -64,8 +67,31 @@ class EquipmentController extends Controller
 
     public function show(Equipment $equipment): Response
     {
+        // This week (from Monday, company time) and next week.
+        $from = CarbonImmutable::now(config()->string('booking.timezone'))->startOfWeek(CarbonInterface::MONDAY);
+        $to = $from->addWeeks(2);
+
+        $bookings = $equipment->bookings()
+            ->active()
+            ->overlapping($from, $to)
+            ->with('user:id,name')
+            ->orderBy('bookings.starts_at')
+            ->get()
+            ->map(fn (Booking $booking) => [
+                'id' => $booking->id,
+                'title' => $booking->title,
+                'starts_at' => $booking->starts_at->toIso8601String(),
+                'ends_at' => $booking->ends_at->toIso8601String(),
+                'owner' => ['id' => $booking->user->id, 'name' => $booking->user->name],
+            ]);
+
         return Inertia::render('equipment/show', [
             'equipment' => $equipment,
+            'bookings' => $bookings,
+            'window' => [
+                'starts_at' => $from->toIso8601String(),
+                'ends_at' => $to->toIso8601String(),
+            ],
         ]);
     }
 
