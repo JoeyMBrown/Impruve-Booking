@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Booking\AvailabilityService;
-use App\Domain\Booking\BookingDraft;
 use App\Domain\Booking\BookingConflictException;
+use App\Domain\Booking\BookingDraft;
 use App\Domain\Booking\BookingRuleException;
 use App\Domain\Booking\BookingService;
 use App\Domain\Booking\ItemAvailability;
