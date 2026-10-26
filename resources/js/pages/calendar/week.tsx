@@ -1,6 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { BookingDrawer } from '@/components/calendar/booking-drawer';
+import { SidePanel } from '@/components/calendar/side-panel';
 import { WeekGrid } from '@/components/calendar/week-grid';
 import { WeekToolbar } from '@/components/calendar/week-toolbar';
 import { useCompanyClock } from '@/hooks/use-company-clock';
@@ -10,7 +11,15 @@ import { create as createBooking } from '@/routes/bookings';
 import type { CalendarBooking, CalendarWeekData } from '@/types';
 
 export default function CalendarWeek(props: CalendarWeekData) {
-    const { week, filters, equipment, bookings } = props;
+    const {
+        week,
+        filters,
+        equipment,
+        bookings,
+        out_now,
+        unavailable,
+        my_at_risk,
+    } = props;
     const { timezone } = usePage().props;
     const clock = useCompanyClock(timezone);
     const days = weekDays(week.start);
@@ -50,14 +59,24 @@ export default function CalendarWeek(props: CalendarWeekData) {
                     filters={filters}
                     equipment={equipment}
                 />
-                <WeekGrid
-                    days={days}
-                    bookings={bookings}
-                    timezone={timezone}
-                    clock={clock}
-                    onOpen={openBooking}
-                    onSlotClick={bookSlot}
-                />
+                <div className="flex flex-col gap-4 lg:flex-row">
+                    <div className="min-w-0 flex-1">
+                        <WeekGrid
+                            days={days}
+                            bookings={bookings}
+                            timezone={timezone}
+                            clock={clock}
+                            onOpen={openBooking}
+                            onSlotClick={bookSlot}
+                        />
+                    </div>
+                    <SidePanel
+                        out_now={out_now}
+                        unavailable={unavailable}
+                        my_at_risk={my_at_risk}
+                        timezone={timezone}
+                    />
+                </div>
             </div>
 
             <BookingDrawer
