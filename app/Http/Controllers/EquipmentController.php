@@ -42,7 +42,7 @@ class EquipmentController extends Controller
             'equipment' => $equipment,
             'filters' => [
                 'category' => $category?->value,
-                'status' => $status?->value ?? self::ACTIVE_FILTER,
+                'status' => $status->value ?? self::ACTIVE_FILTER,
             ],
             ...$this->options(),
         ]);
