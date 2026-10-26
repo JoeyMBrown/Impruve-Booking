@@ -289,10 +289,28 @@ Please review the implementation plan inside of the root directory of this proje
 [4:15] WORK - Claude finished churning on M3, looks like several test failures related to the take home test gate that is only turned on when env variables are present.  Due to CI using a copy of .env.example this wasn't caught until now.  Claude adjusted the .env.example to account for this, and there are existing tests to test it when it is set.
 [4:18] WORK - Bumped into an issue with phpstan, suggested swapping usage of a null safe operator.
 
+[4:22] WORK - Ran usual suite of tests to confirm all is looking good.  CI passing, performed manual UI checks to ensure work flows / filters are working as expected.  UI is decent for MVP but has room for improvement.  Merge PR, move on to M4 clear context, same prompt.
+
+[4:26] DECISIONS -
+- Daylight savings time could be an issue on 2 weeks of the year for the 96hour constraint for booking, trade off is to essentially loosen the rule to 97 hours or have it potentially fail twice a year.  I defferred.
+- Ending a booking "now" could cause weird DB behavior if done at the same time as booking.  Ending "now" should now just default to ending at the next boundary (30 min interval)
+- Validation is happening for title and notes for bookings at the form request and tool schema, it's fine to leave it out of the BookingService.
+
+[4:31] WORK - Review Claude's plan for M4, continue the ol' churn.
+
+[4:34] WORK - Prep deployment strategy while waiting for churn.  Hopefully can save some time here.
+
+[4:36] COMMENT - Post Anthropic API key on reddit for fun - kidding, am very tired
+
+[4:42] WORK - One test failure related to concurrent-confirm requests.  Fixed by polling a live lock state instead of one that was returning a cached state.
+
+[4:46] WORK - Reviewed new rule engine PR CI passing, merged, continue onward.
+
 POST PROJECT NOTES
 - Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
 - Would love to expand on the actual business needs of the client.  Loads of assumptions were made that would've been better to iron out exact requirements via a 30 min conversation.
 - Doing code generation in larger chunks would've been much faster from the get-go, and PRs still provide HITL opportunities where commits can be reviewed for smaller more isolated chunks to review.
+- Agentic workflow is slightly different than my norm, and ate considerable time.  Would love to experiment with another agent that is verifying PRs based on a subset of rules that automatically creates tickets once issues are found.
 - With more time a focus on;
 Permissions
 Potential integration to group chat service
@@ -303,3 +321,6 @@ Better understanding business needs to translate them to more concrete solutions
 Exploration of non agentic software to solve this problem
 Mature agentic workflows for Github, think automatic ticket creation, pickup, and AI PR review
 CD pipeline
+Stricter restrictions on chatbot usage, spend limits to avoid surprises
+Identifying ways to parallel the development process
+More focus on PR review and test quality

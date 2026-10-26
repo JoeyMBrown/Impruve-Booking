@@ -116,6 +116,9 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 8. **No dead links.** Links to pages that don't exist yet ("Book this" → M5, booking detail → M6) are added in the milestone that builds the target page.
 9. **Equipment detail bookings** are a simple list grouped by day for M3; a mini calendar grid can replace it after M6.
 10. **Re-saving the same equipment status** is allowed (to update the reason); it refreshes `status_changed_at`.
+11. **96-hour cap** is measured in real elapsed time, matching the DB CHECK. Over a DST change, Fri 09:00 → Tue 09:00 can be 97 h and is rejected as `too_long`.
+12. **End now** rounds to the next 30-minute boundary strictly after now (10:00:00 → 10:30), so the end is always after now and after the start.
+13. **Title/notes validation** lives in the form request (M5) and tool schema (M8), not `BookingService`; the `string(120)` column is the backstop.
 
 ## Open questions (to resolve at the step they affect)
 
