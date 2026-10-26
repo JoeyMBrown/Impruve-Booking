@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AvailabilityController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentStatusController;
 use App\Http\Controllers\WhoController;
@@ -22,4 +24,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('equipment', EquipmentController::class)->except('destroy');
     Route::put('equipment/{equipment}/status', [EquipmentStatusController::class, 'update'])->name('equipment.status');
     Route::get('api/equipment/{equipment}/status-impact', [EquipmentStatusController::class, 'impact'])->name('api.equipment.impact');
+
+    Route::get('bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+    Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('bookings/{booking}/edit', [BookingController::class, 'edit'])->name('bookings.edit');
+    Route::put('bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
+    Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::get('api/availability', AvailabilityController::class)->name('api.availability');
 });

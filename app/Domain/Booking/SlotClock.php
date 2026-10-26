@@ -26,6 +26,15 @@ final class SlotClock
         return CarbonImmutable::now(self::timezone());
     }
 
+    /**
+     * Parse a time entered by a user. Wall-clock strings without an offset
+     * ("2026-10-29 09:00") are read in the company timezone.
+     */
+    public static function parse(string $value): CarbonImmutable
+    {
+        return CarbonImmutable::parse($value, self::timezone());
+    }
+
     public static function local(CarbonInterface $time): CarbonImmutable
     {
         return CarbonImmutable::instance($time)->setTimezone(self::timezone());

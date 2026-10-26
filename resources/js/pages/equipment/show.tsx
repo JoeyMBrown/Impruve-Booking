@@ -1,9 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Pencil } from 'lucide-react';
+import { CalendarPlus, Pencil } from 'lucide-react';
 import { EquipmentStatusDialog } from '@/components/equipment-status-dialog';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { dayKey, formatDateTime, formatDay, formatRange } from '@/lib/datetime';
+import { create as createBooking } from '@/routes/bookings';
 import { edit, index } from '@/routes/equipment';
 import type {
     Equipment,
@@ -91,6 +92,18 @@ export default function EquipmentShow({
                             equipment={equipment}
                             statuses={statuses}
                         />
+                        {equipment.status === 'available' && (
+                            <Button asChild>
+                                <Link
+                                    href={createBooking({
+                                        query: { equipment: [equipment.id] },
+                                    })}
+                                >
+                                    <CalendarPlus />
+                                    Book this
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
 

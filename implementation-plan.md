@@ -119,6 +119,8 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 11. **96-hour cap** is measured in real elapsed time, matching the DB CHECK. Over a DST change, Fri 09:00 → Tue 09:00 can be 97 h and is rejected as `too_long`.
 12. **End now** rounds to the next 30-minute boundary strictly after now (10:00:00 → 10:30), so the end is always after now and after the start.
 13. **Title/notes validation** lives in the form request (M5) and tool schema (M8), not `BookingService`; the `string(120)` column is the backstop.
+14. **Booking form times** are sent as company-local wall-clock strings and parsed in PHP (Carbon, America/Chicago); the browser does no timezone maths. Native date input + 30-minute time select (no new dependencies).
+15. **Temporary "+ New booking" button** on the placeholder calendar page until M6's calendar header replaces it. Booking edit links arrive with M6's drawer and My bookings.
 
 ## Open questions (to resolve at the step they affect)
 
