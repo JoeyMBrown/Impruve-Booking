@@ -242,7 +242,7 @@ Pasted in deprecations and vulnerabilities to provide context
 
 [3:13] COMMENT - Considering having Claude iterate over entire milestones and then giving me a summary to save time, as step by step is taking ages and I'm tired
 
-[13:17] PROMPT -
+[3:17] PROMPT -
 ```
 Go ahead and commit - can you start to iterate over entire milestones, comitting after each step?  I want a summary
   at the end of each milestone along with a subset of commands that should be ran to verify changes like database
@@ -252,33 +252,54 @@ Go ahead and commit - can you start to iterate over entire milestones, comitting
   merges manually and we should confirm before moving on to the next milestone.
 ```
 
-[13:17] DECISIONS -
+[3:17] DECISIONS -
 - Add 10 placeholder equipment items
 - Only run seeders if tables are empty
 - Swap to Vite+ (oxlint and oxfmt) instead of prettier and ESLint.  Serve same purpose and are already included
 
-[13:26] WORK - Run suite of commands to verify Claude changes for M1 target.  Re-migrate DB with seeders, try to seed when tables already have data, run linter formatter and test cases.  Confirmed seeders don't run a second time.
+[3:26] WORK - Run suite of commands to verify Claude changes for M1 target.  Re-migrate DB with seeders, try to seed when tables already have data, run linter formatter and test cases.  Confirmed seeders don't run a second time.
 
-[13:26] WORK - Have Claude commit outstanding changes, I'll manually PR and merge to get eyes on changes before continuing.
-[13:28] WORK - Push local branches to remote, create PRs, review, merge if CI passes. (Claude created an implmentation-plan branch and branched from that for M1, due to me asking a side question and it defaulting to that branch instead of a seperate branch off main)
+[3:26] WORK - Have Claude commit outstanding changes, I'll manually PR and merge to get eyes on changes before continuing.
+[3:28] WORK - Push local branches to remote, create PRs, review, merge if CI passes. (Claude created an implmentation-plan branch and branched from that for M1, due to me asking a side question and it defaulting to that branch instead of a seperate branch off main)
 
-[13:38] WORK - New CI checks implemented in M1 all passing, look solid.  Models, controllers, seeders, factories, routes, look good.  Nothing too wild here, lot o' scaffold.  Merge PR, checkout main, checkout new feature branch to churn on M2 after confirming M2 implementation plan.
+[3:38] WORK - New CI checks implemented in M1 all passing, look solid.  Models, controllers, seeders, factories, routes, look good.  Nothing too wild here, lot o' scaffold.  Merge PR, checkout main, checkout new feature branch to churn on M2 after confirming M2 implementation plan.
 
-[13:40] PROMPT - Time to go for M2, but lets clear context here - provide a set of instructions thats specific and can be used as a prompt for M3 and M4.
+[3:40] PROMPT - Time to go for M2, but lets clear context here - provide a set of instructions thats specific and can be used as a prompt for M3 and M4.
 ```
 /clear
 
 Please review the implementation plan inside of the root directory of this project.  We're currently on the M2 milestone.  I want you to give me a summary of how you would implement this milestone.  Once I give confirmation go ahead and checkout a new git branch from main and start coding.  You should commit at the end of each step, and pause at the end of the milestone providing me a summary of what you wrote.  From there I want to run the usual suite of commands to ensure code quality (any migrations, linter, formatter, and tests).  Once everything is passing I will go ahead and manually create a PR and merge - which you should wait for confirmation on before doing anything else.  If you have any questions during implementation don't assume - ASK me for clarification before continuing.  Please also include a nice PR message with the summary that I can copy and paste into Github.
 ```
 
-[13:48] DECISIONS -
-- Swap to a side bar for navigation as it comes out of the box
+[3:48] DECISIONS -
+- Swap to a header nav as it comes out of the box with starter kit
 - Hold on implementing nav links until the pages actually exist (no reason to have dead links)
 - PRD specifies an EnsureActingUser middleware, but laravel already has an existing middleware that does the exact same functionality.  Chose to just use the existing middleware instead of creating a second one with the same functionality but only a different name.
 
-[13:54] WORK - Run suite of commands to verify Claude changes for M2 target.  Re-migrate DB with seeders, run linter formatter and test cases.  Manually verified new loose auth.  Along with site wide auth specific to this take home test.
+[3:54] WORK - Run suite of commands to verify Claude changes for M2 target.  Re-migrate DB with seeders, run linter formatter and test cases.  Manually verified new loose auth.  Along with site wide auth specific to this take home test.
+
+[4:00] WORK - Confirm PR looks good, and CI passes.
+
+[4:02] WORK - Clear context, copy/paste prompt on how to operate and what milestone were on.  Review Claude's M3 implementation plan.
+[4:04] DECISIONS -
+- Simple list grouped by day for now to represent page booking details, we can build the grid later in M6.
+- Maintain rule of not implementing dead links
+- Re-saving the same status of equipment to allow for a new reason is fine.
+
+[4:15] WORK - Claude finished churning on M3, looks like several test failures related to the take home test gate that is only turned on when env variables are present.  Due to CI using a copy of .env.example this wasn't caught until now.  Claude adjusted the .env.example to account for this, and there are existing tests to test it when it is set.
+[4:18] WORK - Bumped into an issue with phpstan, suggested swapping usage of a null safe operator.
 
 POST PROJECT NOTES
 - Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
 - Would love to expand on the actual business needs of the client.  Loads of assumptions were made that would've been better to iron out exact requirements via a 30 min conversation.
-- 
+- Doing code generation in larger chunks would've been much faster from the get-go, and PRs still provide HITL opportunities where commits can be reviewed for smaller more isolated chunks to review.
+- With more time a focus on;
+Permissions
+Potential integration to group chat service
+Booking recommendations based on frequently booked equipment per user
+Open booking permissions with logs to back up changes
+Logging for inventory changes tied to user
+Better understanding business needs to translate them to more concrete solutions
+Exploration of non agentic software to solve this problem
+Mature agentic workflows for Github, think automatic ticket creation, pickup, and AI PR review
+CD pipeline

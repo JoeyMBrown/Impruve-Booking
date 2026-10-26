@@ -20,6 +20,9 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <!-- Keep the Basic Auth gate off regardless of the local .env; BasicAuthGateTest turns it on itself. -->
+        <env name="BASIC_AUTH_USER" value=""/>
+        <env name="BASIC_AUTH_PASSWORD" value=""/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
