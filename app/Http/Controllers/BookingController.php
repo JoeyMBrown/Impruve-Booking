@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Booking\AvailabilityService;
 use App\Domain\Booking\BookingConflictException;
 use App\Domain\Booking\BookingDraft;
+use App\Domain\Booking\BookingPresenter;
 use App\Domain\Booking\BookingRuleException;
 use App\Domain\Booking\BookingService;
 use App\Domain\Booking\ItemAvailability;
@@ -153,7 +154,7 @@ class BookingController extends Controller
         } catch (BookingRuleException $exception) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $exception->getMessage()]);
 
-            return $this->redirectToWeekOf($booking);
+            return $this->redirectBackFrom($request, $booking);
         }
 
         Inertia::flash('toast', [
@@ -161,7 +162,39 @@ class BookingController extends Controller
             'message' => $wasInProgress ? "Ended: {$booking->title}." : "Cancelled: {$booking->title}.",
         ]);
 
-        return $this->redirectToWeekOf($booking);
+        return $this->redirectBackFrom($request, $booking);
+    }
+
+    /**
+     * The booking detail page. Everyone can see every booking; the page only
+     * offers Edit and Cancel to the owner.
+     */
+    public function show(Request $request, Booking $booking): Response
+    {
+        Gate::authorize('view', $booking);
+
+        $booking->load(['user:id,name', 'equipment']);
+
+        return Inertia::render('bookings/show', [
+            'booking' => BookingPresenter::toArray($booking, $this->actor($request)),
+        ]);
+    }
+
+    /**
+     * Back to the page the cancel came from (calendar, detail page, My
+     * bookings), or the booking's calendar week when there isn't one. Never
+     * back to the edit form, which no longer applies.
+     */
+    private function redirectBackFrom(Request $request, Booking $booking): RedirectResponse
+    {
+        $weekUrl = $this->weekUrl($booking);
+        $previous = url()->previous($weekUrl);
+
+        if ($previous === $request->url() || str_starts_with($previous, route('bookings.edit', $booking))) {
+            return redirect()->to($weekUrl);
+        }
+
+        return redirect()->to($previous);
     }
 
     /**
@@ -169,9 +202,12 @@ class BookingController extends Controller
      */
     private function redirectToWeekOf(Booking $booking): RedirectResponse
     {
-        return redirect()->route('calendar', [
-            'week' => SlotClock::local($booking->starts_at)->format('o-\WW'),
-        ]);
+        return redirect()->to($this->weekUrl($booking));
+    }
+
+    private function weekUrl(Booking $booking): string
+    {
+        return route('calendar', ['week' => SlotClock::local($booking->starts_at)->format('o-\WW')]);
     }
 
     /**

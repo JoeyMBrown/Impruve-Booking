@@ -121,6 +121,11 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 13. **Title/notes validation** lives in the form request (M5) and tool schema (M8), not `BookingService`; the `string(120)` column is the backstop.
 14. **Booking form times** are sent as company-local wall-clock strings and parsed in PHP (Carbon, America/Chicago); the browser does no timezone maths. Native date input + 30-minute time select (no new dependencies).
 15. **Temporary "+ New booking" button** on the placeholder calendar page until M6's calendar header replaces it. Booking edit links arrive with M6's drawer and My bookings.
+16. **Calendar "Unavailable" panel** lists out-of-service items only; retired items have left the inventory.
+17. **Empty-slot click** prefills exactly that 30-minute slot.
+18. **Cancel / End now** return to the page the user came from (calendar, detail page, My bookings), falling back to the booking's calendar week. Form saves still return to the calendar week (FR-FORM-6).
+19. **Calendar filters** are single-select: one category, one item, Only mine.
+20. **Booking drawer** opens without changing the URL and links to `/bookings/{id}` ("Open page") for sharing.
 
 ## Open questions (to resolve at the step they affect)
 

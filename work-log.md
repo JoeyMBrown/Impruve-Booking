@@ -312,6 +312,23 @@ Please review the implementation plan inside of the root directory of this proje
 
 [4:58] WORK - Run suite of commands to test new logic.  Click through new UI to verify expected behaviors and safe guards in place to prevent editing of another users booking.  Updates are happening from UI when equipment statuses are changed, can't book a piece of equipment that has already booked for a timeslot.  Can't book in the past.  Looking good so far.
 
+[5:08] WORK - CI had failure on formatting issue.  Ran pint, commited fix.  Moving on to M6.
+
+[5:08] COMMENT - In 2026 how does Github not have a sticky header, scrolling to the top of the page of a mult-file PR is soooo much effort.
+
+[5:13] DECISIONS -
+- Unavailable side panel should not include retired equipment
+- Time range on empty slot select should default to 30 mins
+- For return buttons or redirects lets default to returning to previous page the user was on
+- Filtering should start out as one category and one item at a time - we can adjust if necessary later
+- Drawer should open without changing the URL and include an "Open Page" link
+
+[5:08] COMMENT - Am not spending nearly as much time as I'd like to reviewing PRs but already over time, need to get to M8 then deploy ASAP to stay as close to time constraint as possible.
+
+[5:25] BREAK - Back from break to stretch
+
+[5:36] WORK - Clicked through entire new UI sweet testing different cases, users, etc.  Attempted to break flow or surpass business constraints to no avail.
+
 POST PROJECT NOTES
 - Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
 - Would love to expand on the actual business needs of the client.  Loads of assumptions were made that would've been better to iron out exact requirements via a 30 min conversation.

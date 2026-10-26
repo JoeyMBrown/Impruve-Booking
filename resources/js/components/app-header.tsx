@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { CalendarDays, Menu, Package } from 'lucide-react';
+import { CalendarDays, ListChecks, Menu, Package } from 'lucide-react';
 import { ActingUser } from '@/components/acting-user';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
@@ -21,6 +21,7 @@ import {
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
 import { calendar } from '@/routes';
+import { mine as myBookings } from '@/routes/bookings';
 import { index as equipmentIndex } from '@/routes/equipment';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
@@ -28,12 +29,16 @@ type Props = {
     breadcrumbs?: BreadcrumbItem[];
 };
 
-// Links are added in the milestone that builds each page (My bookings: M6).
 const mainNavItems: NavItem[] = [
     {
         title: 'Calendar',
         href: calendar(),
         icon: CalendarDays,
+    },
+    {
+        title: 'My bookings',
+        href: myBookings(),
+        icon: ListChecks,
     },
     {
         title: 'Equipment',
