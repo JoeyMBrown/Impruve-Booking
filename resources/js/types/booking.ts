@@ -35,3 +35,12 @@ export type BookingFormValues = {
     title: string;
     notes: string;
 };
+
+/** The booking being edited, as passed to the booking form. */
+export type EditableBooking = {
+    id: number;
+    title: string;
+    phase: 'upcoming' | 'in_progress';
+    /** When "End now" would end it: the next slot boundary (ISO 8601). */
+    ends_now_at: string;
+};

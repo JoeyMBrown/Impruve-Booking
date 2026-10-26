@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Booking\AvailabilityService;
+use App\Domain\Booking\BookingDraft;
 use App\Domain\Booking\BookingConflictException;
 use App\Domain\Booking\BookingRuleException;
 use App\Domain\Booking\BookingService;
 use App\Domain\Booking\ItemAvailability;
 use App\Domain\Booking\SlotClock;
+use App\Enums\BookingPhase;
 use App\Enums\BookingSource;
 use App\Enums\EquipmentCategory;
 use App\Enums\EquipmentStatus;
@@ -18,6 +20,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -80,6 +83,83 @@ class BookingController extends Controller
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => "Booked: {$booking->title}."]);
+
+        return $this->redirectToWeekOf($booking);
+    }
+
+    /**
+     * The same form for the owner's booking. An in-progress booking opens in
+     * a restricted mode where only the end can move (or End now).
+     */
+    public function edit(Booking $booking): Response|RedirectResponse
+    {
+        Gate::authorize('update', $booking);
+
+        $phase = $booking->phase();
+
+        if (! $booking->is_active || $phase === BookingPhase::Ended) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'This booking can no longer be changed.']);
+
+            return $this->redirectToWeekOf($booking);
+        }
+
+        $draft = BookingDraft::fromBooking($booking);
+
+        return Inertia::render('bookings/form', [
+            'booking' => [
+                'id' => $booking->id,
+                'title' => $booking->title,
+                'phase' => $phase,
+                'ends_now_at' => $booking->ends_at->min(SlotClock::nextSlotAfter(SlotClock::now()))->toIso8601String(),
+            ],
+            'values' => [
+                'starts_at' => SlotClock::local($booking->starts_at)->format(self::FORM_TIME_FORMAT),
+                'ends_at' => SlotClock::local($booking->ends_at)->format(self::FORM_TIME_FORMAT),
+                'equipment_ids' => $draft->equipmentIds,
+                'title' => $booking->title,
+                'notes' => $booking->notes ?? '',
+            ],
+            'availability' => $this->availabilityFor($booking->starts_at, $booking->ends_at, $booking->id),
+            ...$this->formOptions(),
+        ]);
+    }
+
+    public function update(BookingRequest $request, Booking $booking): RedirectResponse
+    {
+        Gate::authorize('update', $booking);
+
+        try {
+            $booking = $this->bookings->update($booking, $request->toDraft(), $this->actor($request));
+        } catch (BookingRuleException|BookingConflictException $exception) {
+            throw $this->validationErrors($exception);
+        }
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Saved: {$booking->title}."]);
+
+        return $this->redirectToWeekOf($booking);
+    }
+
+    /**
+     * Cancel an upcoming booking, or end an in-progress one now.
+     */
+    public function cancel(Request $request, Booking $booking): RedirectResponse
+    {
+        Gate::authorize('cancel', $booking);
+
+        $wasInProgress = $booking->phase() === BookingPhase::InProgress;
+
+        try {
+            $this->bookings->cancel($booking, $this->actor($request));
+        } catch (BookingRuleException $exception) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $exception->getMessage()]);
+
+            return $this->redirectToWeekOf($booking);
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => $wasInProgress ? "Ended: {$booking->title}." : "Cancelled: {$booking->title}.",
+        ]);
 
         return $this->redirectToWeekOf($booking);
     }
