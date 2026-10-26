@@ -91,7 +91,7 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 | **8.4 Chat endpoints** | `POST /chat/conversations` (new per page load). `POST /chat/conversations/{id}/messages` → SSE (`text`, `proposal`, `error`, `done`), conversation ownership checked before continuing, 20/min per-user rate limit, provider failure → `error` event. `POST /chat/proposals/{id}/confirm` (200 / 409 conflicts / 410 expired / 422 rule) and `/dismiss` (204), ownership enforced; confirm saves with `source=chat`. | FR-CHAT-2, 6, 12–16, R10 |
 | **8.5 Chat widget** | Floating widget on every authenticated page; new conversation on page load and on user switch; 3–4 suggestion chips from real item names; streamed replies via `fetch` + `ReadableStream`; input disabled while streaming, Stop aborts, Enter sends. Proposal cards with all states (pending, confirming, booked + calendar link, taken, expired, dismissed); on 409 auto-send the system follow-up message. "Assistant unavailable" + Book manually link. Notify an open calendar to refetch after confirm. | FR-CHAT-1–4, 11–13, 15, FR-AUTH-4, FR-CAL-9 |
 | **8.6 Edit in form** | `/bookings/create?proposal={uuid}` prefill (owner's proposals only) with the "From your chat request" banner. | FR-FORM-4 |
-| **8.7 Prune + expiry command** | Scheduled command: delete conversations older than 30 days, mark expired pending proposals `expired`. Scheduler running in Sail. | FR-CHAT-18, Q6 |
+| **8.7 Prune + expiry command** | Scheduled command: delete conversations older than 30 days, mark expired pending proposals `expired`. Scheduled in `routes/console.php` (decision 22). | FR-CHAT-18, Q6 |
 | **8.8 Chat test suites** | Feature: `BookingAssistant::fake()` + `preventStrayPrompts()` for SSE envelope, conversation ownership, rate limit, confirm/dismiss/expire, 409 race, unavailable path. Unit: each tool directly (availability output, propose error codes, refusing others' bookings, no `user_id` arg). Conversations A–J covered via fakes + tool tests. | §7.7 AC, §10 |
 
 ## M9: UAT
@@ -127,7 +127,11 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 19. **Calendar filters** are single-select: one category, one item, Only mine.
 20. **Booking drawer** opens without changing the URL and links to `/bookings/{id}` ("Open page") for sharing.
 21. **Streaming (M7 spike):** proposal cards are sent **mid-stream** on the tool's `ToolResult` event; the R6 cards-at-end fallback isn't needed. Findings and API notes are in [`spike-streaming.md`](./spike-streaming.md).
+22. **Scheduler:** `chat:prune` is scheduled in `routes/console.php`; there's no scheduler container in Sail (dev only). Run `sail artisan schedule:work` by hand when needed.
+23. **Chat lifetime:** the conversation survives in-app (Inertia) navigation and starts fresh on a full page load or user switch. The conversation row is created when the widget is first opened.
+24. **Stop** aborts the reply; the aborted turn isn't stored (the user can rephrase).
+25. **Edit in form:** create cards open `/bookings/create?proposal=`, change cards open `/bookings/{id}/edit?proposal=` prefilled with the proposed values, cancel cards have no Edit in form button.
 
-## Open questions (to resolve at the step they affect)
+## Open questions
 
-1. *(At 8.7)* How to run the scheduler under Sail (dedicated container vs. a manual `schedule:work`).
+None open.

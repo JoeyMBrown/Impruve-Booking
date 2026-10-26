@@ -13,13 +13,30 @@ return [
     |
     */
 
-    'default' => 'openai',
+    'default' => 'anthropic',
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
     'default_for_embeddings' => 'openai',
     'default_for_reranking' => 'cohere',
     'default_for_classification' => 'typesafe',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Booking Assistant
+    |--------------------------------------------------------------------------
+    |
+    | The chat assistant's model (changeable without a code change, R4). Each
+    | page load starts a new conversation, so titles are taken from the first
+    | message instead of an extra model call per conversation.
+    |
+    */
+
+    'chat_model' => env('AI_CHAT_MODEL', 'claude-haiku-5-5'),
+
+    'conversations' => [
+        'generate_title' => false,
+    ],
 
     /*
     |--------------------------------------------------------------------------
