@@ -1,9 +1,10 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BookingDrawer } from '@/components/calendar/booking-drawer';
 import { SidePanel } from '@/components/calendar/side-panel';
 import { WeekGrid } from '@/components/calendar/week-grid';
 import { WeekToolbar } from '@/components/calendar/week-toolbar';
+import { BOOKING_CHANGED_EVENT } from '@/hooks/use-chat';
 import { useCompanyClock } from '@/hooks/use-company-clock';
 import { timeOfDay, weekDays } from '@/lib/calendar';
 import { addMinutesLocal, joinLocal } from '@/lib/local-time';
@@ -23,6 +24,18 @@ export default function CalendarWeek(props: CalendarWeekData) {
     const { timezone } = usePage().props;
     const clock = useCompanyClock(timezone);
     const days = weekDays(week.start);
+
+    // After a chat confirm, refetch this week's data without a full reload.
+    useEffect(() => {
+        const refresh = () =>
+            router.reload({
+                only: ['bookings', 'out_now', 'unavailable', 'my_at_risk'],
+            });
+
+        window.addEventListener(BOOKING_CHANGED_EVENT, refresh);
+
+        return () => window.removeEventListener(BOOKING_CHANGED_EVENT, refresh);
+    }, []);
 
     // Clicking an empty slot books exactly that 30-minute slot (and the
     // filtered item, if the calendar shows one item's week).
