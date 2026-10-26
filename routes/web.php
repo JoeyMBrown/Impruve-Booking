@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\WhoController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +16,7 @@ Route::middleware('auth')->group(function () {
     Route::post('switch-user', [WhoController::class, 'destroy'])->name('who.destroy');
 
     Route::inertia('calendar', 'calendar/week')->name('calendar');
+
+    // No destroy: equipment is retired through its status, never deleted.
+    Route::resource('equipment', EquipmentController::class)->except('destroy');
 });

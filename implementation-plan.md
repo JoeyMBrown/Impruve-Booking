@@ -113,6 +113,9 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 5. **Frontend lint/format** uses the starter kit's Vite+ (`vp check`: oxlint + oxfmt) instead of ESLint + Prettier. PRD §9.2 and §11 updated.
 6. **Acting-user middleware** is Laravel's built-in `auth` (guests redirected to `/who`), not a custom `EnsureActingUser`. PRD §9.2 updated.
 7. **Shell** uses the kit's top-header layout (matches D§6). Nav links are added in the milestone that builds each page.
+8. **No dead links.** Links to pages that don't exist yet ("Book this" → M5, booking detail → M6) are added in the milestone that builds the target page.
+9. **Equipment detail bookings** are a simple list grouped by day for M3; a mini calendar grid can replace it after M6.
+10. **Re-saving the same equipment status** is allowed (to update the reason); it refreshes `status_changed_at`.
 
 ## Open questions (to resolve at the step they affect)
 
