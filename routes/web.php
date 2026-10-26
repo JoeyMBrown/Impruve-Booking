@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AvailabilityController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentStatusController;
 use App\Http\Controllers\WhoController;
@@ -24,5 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::put('equipment/{equipment}/status', [EquipmentStatusController::class, 'update'])->name('equipment.status');
     Route::get('api/equipment/{equipment}/status-impact', [EquipmentStatusController::class, 'impact'])->name('api.equipment.impact');
 
+    Route::get('bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+    Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('api/availability', AvailabilityController::class)->name('api.availability');
 });
