@@ -3,9 +3,13 @@
 namespace App\Ai\Agents;
 
 use App\Ai\BookingAssistantPrompt;
+use App\Ai\ProposalCollector;
 use App\Ai\Tools\CheckAvailability;
 use App\Ai\Tools\FindOpenings;
 use App\Ai\Tools\ListMyBookings;
+use App\Ai\Tools\ProposeBooking;
+use App\Ai\Tools\ProposeCancellation;
+use App\Ai\Tools\ProposeChange;
 use App\Ai\Tools\ToolContext;
 use App\Models\User;
 use Laravel\Ai\Concerns\RemembersConversations;
@@ -24,7 +28,10 @@ class BookingAssistant implements Agent, Conversational, HasTools
 {
     use Promptable, RemembersConversations;
 
-    public function __construct(private readonly User $user) {}
+    public function __construct(
+        private readonly User $user,
+        private readonly ProposalCollector $proposals = new ProposalCollector,
+    ) {}
 
     public function instructions(): string
     {
@@ -32,19 +39,22 @@ class BookingAssistant implements Agent, Conversational, HasTools
     }
 
     /**
-     * Read-only tools. Each gets the acting user from the session, never as
-     * an argument the model could set.
+     * Read and propose tools only; none of them can save a booking. Each gets
+     * the acting user from the session, never as an argument the model sets.
      *
      * @return list<Tool>
      */
     public function tools(): iterable
     {
-        $context = new ToolContext($this->user, $this->currentConversation());
+        $context = new ToolContext($this->user, $this->currentConversation(), $this->proposals);
 
         return [
             new CheckAvailability($context),
             new FindOpenings($context),
             new ListMyBookings($context),
+            new ProposeBooking($context),
+            new ProposeChange($context),
+            new ProposeCancellation($context),
         ];
     }
 
