@@ -264,7 +264,7 @@ The same rules engine (`BookingService`) is used by every save path: the form, t
 
 ### 9.2 Starter kit adaptation
 
-Start from the **official Laravel React starter kit** and keep its layout shell, shadcn setup, TypeScript/ESLint/Prettier config and Vite wiring. **Remove** login, registration, password reset, email verification, 2FA, the profile/settings pages, and the Fortify routes and views, plus the tests for all of these. Replace them with `/who`, `EnsureActingUser` and switch-user (FR-AUTH). Keep the `users.password` column (nullable) so real auth can be added later.
+Start from the **official Laravel React starter kit** and keep its layout shell, shadcn setup, TypeScript and lint/format config (Vite+: oxlint + oxfmt) and Vite wiring. **Remove** login, registration, password reset, email verification, 2FA, the profile/settings pages, and the Fortify routes and views, plus the tests for all of these. Replace them with `/who`, `EnsureActingUser` and switch-user (FR-AUTH). Keep the `users.password` column (nullable) so real auth can be added later.
 
 ### 9.3 Scaffold-time checks
 
@@ -299,7 +299,7 @@ Runs on every pull request and on every push to `main`. All jobs must pass befor
 |---|---|
 | **php-quality** | PHP 8.5 setup, `composer install`, **Pint** (`--test`), **Larastan/PHPStan** (starting at a moderate level and raising it over time) |
 | **php-tests** | Postgres service container, `migrate`, **PHPUnit** (the full suite, including the DB concurrency tests) |
-| **frontend** | Node setup, `npm ci`, **`tsc --noEmit`**, **ESLint**, **Prettier** check, **`npm run build`** |
+| **frontend** | Node setup, `npm ci`, **`npm run build`**, **`tsc --noEmit`**, **lint + format check** (`vp check`: oxlint + oxfmt, the starter kit's Vite+ tooling, in place of ESLint/Prettier; decided 2026-10-26) |
 
 There is no deployment job (R13). CI never calls the Anthropic API, and agent tests use fakes.
 
