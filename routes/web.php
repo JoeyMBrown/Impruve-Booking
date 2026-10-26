@@ -5,6 +5,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentStatusController;
+use App\Http\Controllers\MyBookingsController;
 use App\Http\Controllers\WhoController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,5 +34,6 @@ Route::middleware('auth')->group(function () {
     Route::get('bookings/{booking}/edit', [BookingController::class, 'edit'])->name('bookings.edit');
     Route::put('bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
     Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::get('my-bookings', MyBookingsController::class)->name('bookings.mine');
     Route::get('api/availability', AvailabilityController::class)->name('api.availability');
 });
