@@ -31,7 +31,8 @@ class AvailabilityService
             ->orderBy('name')
             ->get();
 
-        $conflicts = collect($this->conflicts($equipment->modelKeys(), $from, $to, $ignoreBookingId))
+        $ids = array_values(array_map(fn ($id) => (int) $id, $equipment->modelKeys()));
+        $conflicts = collect($this->conflicts($ids, $from, $to, $ignoreBookingId))
             ->groupBy('equipment_id');
 
         return $equipment->map(function (Equipment $item) use ($conflicts) {
@@ -129,7 +130,7 @@ class AvailabilityService
             return [];
         }
 
-        return BookingItem::query()
+        return array_values(BookingItem::query()
             ->with(['booking.user:id,name', 'equipment:id,name'])
             ->where('is_active', true)
             ->whereIn('equipment_id', $equipmentIds)
@@ -147,7 +148,6 @@ class AvailabilityService
                 'starts_at' => $item->starts_at->toIso8601String(),
                 'ends_at' => $item->ends_at->toIso8601String(),
             ])
-            ->values()
-            ->all();
+            ->all());
     }
 }

@@ -367,7 +367,7 @@ class BookingService
      */
     private function itemIds(Booking $booking): array
     {
-        return $booking->items()->pluck('equipment_id')->map(fn ($id) => (int) $id)->values()->all();
+        return array_values($booking->items()->pluck('equipment_id')->map(fn ($id) => (int) $id)->all());
     }
 
     private function durationMinutes(BookingDraft $draft): float
