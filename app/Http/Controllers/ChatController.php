@@ -114,11 +114,15 @@ class ChatController extends Controller
         echo "event: {$event}\n";
         echo 'data: '.json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n\n";
 
-        if (ob_get_level() > 0) {
-            ob_flush();
-        }
+        // Push each event out now. Tests capture the stream in an output
+        // buffer, which flushing would empty past the capture.
+        if (! app()->runningUnitTests()) {
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
 
-        flush();
+            flush();
+        }
     }
 
     private function ownsConversation(string $conversationId, User $user): bool
