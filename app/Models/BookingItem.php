@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonImmutable $starts_at
  * @property CarbonImmutable $ends_at
  * @property bool $is_active
+ * @property-read Booking $booking
+ * @property-read Equipment $equipment
  */
 #[Table(timestamps: false, dateFormat: 'Y-m-d H:i:sP')]
 #[Fillable(['booking_id', 'equipment_id', 'starts_at', 'ends_at', 'is_active'])]
