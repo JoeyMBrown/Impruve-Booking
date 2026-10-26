@@ -1,7 +1,9 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, TriangleAlert } from 'lucide-react';
+import { useEffect } from 'react';
 import { CancelButton } from '@/components/booking/booking-details';
 import { Button } from '@/components/ui/button';
+import { BOOKING_CHANGED_EVENT } from '@/hooks/use-chat';
 import { formatRange } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
 import { edit, mine, show } from '@/routes/bookings';
@@ -26,6 +28,15 @@ export default function MyBookings({ tab, tabs }: Props) {
     const needsAttention = [...tabs.upcoming, ...tabs.in_progress].filter(
         (booking) => booking.at_risk,
     ).length;
+
+    // Bookings confirmed or cancelled in the chat show up straight away.
+    useEffect(() => {
+        const refresh = () => router.reload({ only: ['tabs'] });
+
+        window.addEventListener(BOOKING_CHANGED_EVENT, refresh);
+
+        return () => window.removeEventListener(BOOKING_CHANGED_EVENT, refresh);
+    }, []);
 
     const selectTab = (next: Tab) => {
         router.get(

@@ -5,9 +5,11 @@ namespace App\Models;
 use App\Enums\ProposalAction;
 use App\Enums\ProposalStatus;
 use Carbon\CarbonImmutable;
+use Database\Factories\BookingProposalFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,12 +25,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonImmutable $expires_at
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ * @property-read Booking|null $booking
+ * @property-read User $user
  */
 #[Table(dateFormat: 'Y-m-d H:i:sP')]
 #[Fillable(['user_id', 'conversation_id', 'action', 'booking_id', 'payload', 'status', 'failure', 'expires_at'])]
 class BookingProposal extends Model
 {
-    use HasUuids;
+    /** @use HasFactory<BookingProposalFactory> */
+    use HasFactory, HasUuids;
 
     /**
      * Get the attributes that should be cast.

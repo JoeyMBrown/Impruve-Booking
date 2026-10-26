@@ -3,9 +3,11 @@
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentStatusController;
 use App\Http\Controllers\MyBookingsController;
+use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\WhoController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,4 +38,11 @@ Route::middleware('auth')->group(function () {
     Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::get('my-bookings', MyBookingsController::class)->name('bookings.mine');
     Route::get('api/availability', AvailabilityController::class)->name('api.availability');
+
+    Route::post('chat/conversations', [ChatController::class, 'start'])->name('chat.start');
+    Route::post('chat/conversations/{conversation}/messages', [ChatController::class, 'message'])
+        ->middleware('throttle:chat')
+        ->name('chat.message');
+    Route::post('chat/proposals/{proposal}/confirm', [ProposalController::class, 'confirm'])->name('chat.proposals.confirm');
+    Route::post('chat/proposals/{proposal}/dismiss', [ProposalController::class, 'dismiss'])->name('chat.proposals.dismiss');
 });
