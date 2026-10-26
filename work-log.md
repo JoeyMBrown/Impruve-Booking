@@ -302,6 +302,10 @@ Please review the implementation plan inside of the root directory of this proje
 
 [4:36] COMMENT - Post Anthropic API key on reddit for fun - kidding, am very tired
 
+[4:42] WORK - One test failure related to concurrent-confirm requests.  Fixed by polling a live lock state instead of one that was returning a cached state.
+
+[4:46] WORK - Reviewed new rule engine PR CI passing, merged, continue onward.
+
 POST PROJECT NOTES
 - Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
 - Would love to expand on the actual business needs of the client.  Loads of assumptions were made that would've been better to iron out exact requirements via a 30 min conversation.
@@ -319,3 +323,4 @@ Mature agentic workflows for Github, think automatic ticket creation, pickup, an
 CD pipeline
 Stricter restrictions on chatbot usage, spend limits to avoid surprises
 Identifying ways to parallel the development process
+More focus on PR review and test quality
