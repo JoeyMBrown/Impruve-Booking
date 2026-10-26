@@ -1,4 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { BookingDrawer } from '@/components/calendar/booking-drawer';
 import { WeekGrid } from '@/components/calendar/week-grid';
 import { WeekToolbar } from '@/components/calendar/week-toolbar';
 import { useCompanyClock } from '@/hooks/use-company-clock';
@@ -31,10 +33,12 @@ export default function CalendarWeek(props: CalendarWeekData) {
         );
     };
 
-    const openBooking = (booking: CalendarBooking) => {
-        // The booking drawer is wired up in the next step.
-        void booking;
-    };
+    // Look the booking up by id so the drawer shows fresh data after a reload.
+    const [openBookingId, setOpenBookingId] = useState<number | null>(null);
+    const openBooking = (booking: CalendarBooking) =>
+        setOpenBookingId(booking.id);
+    const selected =
+        bookings.find((booking) => booking.id === openBookingId) ?? null;
 
     return (
         <>
@@ -55,6 +59,12 @@ export default function CalendarWeek(props: CalendarWeekData) {
                     onSlotClick={bookSlot}
                 />
             </div>
+
+            <BookingDrawer
+                booking={selected}
+                timezone={timezone}
+                onClose={() => setOpenBookingId(null)}
+            />
         </>
     );
 }

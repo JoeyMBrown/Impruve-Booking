@@ -4,7 +4,10 @@ import { EquipmentStatusDialog } from '@/components/equipment-status-dialog';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { dayKey, formatDateTime, formatDay, formatRange } from '@/lib/datetime';
-import { create as createBooking } from '@/routes/bookings';
+import {
+    create as createBooking,
+    show as showBooking,
+} from '@/routes/bookings';
 import { edit, index } from '@/routes/equipment';
 import type {
     Equipment,
@@ -161,9 +164,12 @@ export default function EquipmentShow({
                                         key={booking.id}
                                         className="flex flex-wrap justify-between gap-2 px-4 py-2 text-sm"
                                     >
-                                        <span className="font-medium">
+                                        <Link
+                                            href={showBooking(booking.id)}
+                                            className="font-medium hover:underline"
+                                        >
                                             {booking.title}
-                                        </span>
+                                        </Link>
                                         <span className="text-muted-foreground">
                                             {formatRange(
                                                 booking.starts_at,

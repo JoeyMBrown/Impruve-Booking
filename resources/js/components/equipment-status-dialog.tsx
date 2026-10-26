@@ -1,4 +1,4 @@
-import { Form, usePage } from '@inertiajs/react';
+import { Form, Link, usePage } from '@inertiajs/react';
 import { RefreshCw, TriangleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import InputError from '@/components/input-error';
@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { formatRange } from '@/lib/datetime';
 import { impact } from '@/routes/api/equipment';
+import { show as showBooking } from '@/routes/bookings';
 import { status as updateStatus } from '@/routes/equipment';
 import type {
     Equipment,
@@ -227,7 +228,14 @@ function ImpactPreview({
                             booking.ends_at,
                             timezone,
                         )}{' '}
-                        · {booking.title} · {booking.owner.name}
+                        ·{' '}
+                        <Link
+                            href={showBooking(booking.id)}
+                            className="underline"
+                        >
+                            {booking.title}
+                        </Link>{' '}
+                        · {booking.owner.name}
                         {booking.phase === 'in_progress' && (
                             <span className="text-muted-foreground">
                                 {' '}
