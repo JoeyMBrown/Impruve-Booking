@@ -84,9 +84,10 @@ class ConcurrentConfirmTest extends TestCase
         $deadline = microtime(true) + 20;
 
         while (microtime(true) < $deadline) {
+            // pg_locks is live; pg_stat_activity would return the same cached
+            // snapshot for the whole of our open transaction.
             $blocked = DB::selectOne(
-                "select count(*) as waiting from pg_stat_activity
-                 where datname = current_database() and wait_event_type = 'Lock' and pid <> pg_backend_pid()",
+                'select count(*) as waiting from pg_locks where not granted and pid <> pg_backend_pid()',
             );
 
             if ($blocked->waiting > 0) {
