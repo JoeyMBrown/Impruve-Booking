@@ -3,12 +3,16 @@
 namespace App\Domain\Booking;
 
 use App\Enums\BookingPhase;
+use App\Enums\BookingSource;
 use App\Enums\EquipmentStatus;
 use App\Models\Booking;
 use App\Models\Equipment;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Closure;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The single source of booking rules. The manual form, the confirm endpoint
@@ -107,6 +111,151 @@ class BookingService
         }
 
         return new CheckResult($violations);
+    }
+
+    /**
+     * Save a new booking. The exclusion constraint is the final guard if
+     * another save wins a race after the check.
+     *
+     * @throws BookingRuleException
+     * @throws BookingConflictException
+     */
+    public function create(BookingDraft $draft, User $actor, BookingSource $source): Booking
+    {
+        $this->assertPasses($this->check($draft, $actor));
+
+        return $this->guardConflicts($draft, null, function () use ($draft, $actor, $source) {
+            $booking = Booking::create([
+                'user_id' => $actor->id,
+                'title' => $draft->title,
+                'notes' => $draft->notes,
+                'starts_at' => $draft->startsAt,
+                'ends_at' => $draft->endsAt,
+                'source' => $source,
+                'is_active' => true,
+            ]);
+
+            $this->addItems($booking, $draft->equipmentIds);
+
+            return $booking;
+        });
+    }
+
+    /**
+     * Save changes to a booking. Only the bookings row is written for the
+     * range; the cascading foreign key updates every item row's copy.
+     *
+     * @throws BookingRuleException
+     * @throws BookingConflictException
+     */
+    public function update(Booking $booking, BookingDraft $draft, User $actor): Booking
+    {
+        $this->assertPasses($this->check($draft, $actor, $booking));
+
+        return $this->guardConflicts($draft, $booking->id, function () use ($booking, $draft) {
+            $booking->update([
+                'title' => $draft->title,
+                'notes' => $draft->notes,
+                'starts_at' => $draft->startsAt,
+                'ends_at' => $draft->endsAt,
+            ]);
+
+            $current = $this->itemIds($booking);
+            $removed = array_values(array_diff($current, $draft->equipmentIds));
+            $added = array_values(array_diff($draft->equipmentIds, $current));
+
+            if ($removed !== []) {
+                $booking->items()->whereIn('equipment_id', $removed)->delete();
+            }
+
+            $this->addItems($booking, $added);
+
+            return $booking->refresh();
+        });
+    }
+
+    /**
+     * Cancel an upcoming booking, or end an in-progress one now (its end
+     * moves to the next slot boundary). Ended bookings can't be cancelled.
+     *
+     * @throws BookingRuleException
+     */
+    public function cancel(Booking $booking, User $actor): Booking
+    {
+        if ($booking->user_id !== $actor->id) {
+            throw new BookingRuleException(CheckResult::fail($this->ownerOnly()));
+        }
+
+        if (! $booking->is_active) {
+            throw new BookingRuleException(CheckResult::fail($this->immutable('This booking is already cancelled.')));
+        }
+
+        $now = SlotClock::now();
+
+        $changes = match ($booking->phase($now)) {
+            BookingPhase::Upcoming => ['cancelled_at' => $now, 'is_active' => false],
+            BookingPhase::InProgress => ['ends_at' => $booking->ends_at->min(SlotClock::nextSlotAfter($now))],
+            BookingPhase::Ended => throw new BookingRuleException(CheckResult::fail($this->immutable('This booking has ended and can’t be cancelled.'))),
+        };
+
+        // The cascading foreign key carries the change to every item row.
+        $booking->update($changes);
+
+        return $booking;
+    }
+
+    /**
+     * @throws BookingRuleException
+     */
+    private function assertPasses(CheckResult $result): void
+    {
+        if (! $result->ok()) {
+            throw new BookingRuleException($result);
+        }
+    }
+
+    /**
+     * Run the write in a transaction, turning an exclusion-constraint
+     * violation (SQLSTATE 23P01) into a conflict listing the items now taken.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $write
+     * @return T
+     *
+     * @throws BookingConflictException
+     */
+    private function guardConflicts(BookingDraft $draft, ?int $ignoreBookingId, Closure $write): mixed
+    {
+        try {
+            return DB::transaction($write);
+        } catch (QueryException $exception) {
+            if ($exception->getCode() !== '23P01') {
+                throw $exception;
+            }
+
+            throw new BookingConflictException(
+                $this->availability->conflicts($draft->equipmentIds, $draft->startsAt, $draft->endsAt, $ignoreBookingId),
+            );
+        }
+    }
+
+    /**
+     * Insert item rows carrying a copy of the booking's range and active
+     * flag. After this, the composite foreign key keeps the copies in sync.
+     *
+     * @param  list<int>  $equipmentIds
+     */
+    private function addItems(Booking $booking, array $equipmentIds): void
+    {
+        foreach ($equipmentIds as $equipmentId) {
+            $booking->items()->create([
+                'equipment_id' => $equipmentId,
+                'starts_at' => $booking->starts_at,
+                'ends_at' => $booking->ends_at,
+                'is_active' => $booking->is_active,
+            ]);
+        }
     }
 
     /**
