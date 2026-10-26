@@ -32,7 +32,7 @@ final class ProposalCard
             ...self::values($payload['equipment_ids'], $payload['starts_at'], $payload['ends_at'], $payload['title'], $payload['notes']),
             'before' => $booking && $proposal->action->value === 'update'
                 ? self::values(
-                    $booking->items()->pluck('equipment_id')->map(fn ($id) => (int) $id)->all(),
+                    array_values($booking->items()->pluck('equipment_id')->map(fn ($id) => (int) $id)->all()),
                     $booking->starts_at->toIso8601String(),
                     $booking->ends_at->toIso8601String(),
                     $booking->title,
@@ -57,10 +57,10 @@ final class ProposalCard
         return [
             'title' => $title,
             'notes' => $notes,
-            'items' => array_values(array_map(
+            'items' => array_map(
                 fn (int $id) => ['id' => $id, 'name' => (string) ($names[$id] ?? "Item #{$id}")],
                 $equipmentIds,
-            )),
+            ),
             'starts_at' => $from->toIso8601String(),
             'ends_at' => $to->toIso8601String(),
             'display' => [
