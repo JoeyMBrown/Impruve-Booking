@@ -126,8 +126,8 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 18. **Cancel / End now** return to the page the user came from (calendar, detail page, My bookings), falling back to the booking's calendar week. Form saves still return to the calendar week (FR-FORM-6).
 19. **Calendar filters** are single-select: one category, one item, Only mine.
 20. **Booking drawer** opens without changing the URL and links to `/bookings/{id}` ("Open page") for sharing.
+21. **Streaming (M7 spike):** proposal cards are sent **mid-stream** on the tool's `ToolResult` event; the R6 cards-at-end fallback isn't needed. Findings and API notes are in [`spike-streaming.md`](./spike-streaming.md).
 
 ## Open questions (to resolve at the step they affect)
 
-1. *(At 7.2)* Where to write the spike decision.
-2. *(At 8.7)* How to run the scheduler under Sail (dedicated container vs. a manual `schedule:work`).
+1. *(At 8.7)* How to run the scheduler under Sail (dedicated container vs. a manual `schedule:work`).

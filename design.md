@@ -477,6 +477,8 @@ event: done      data: {}
 > - The React side reads the response with `fetch()` and a `ReadableStream` reader. `EventSource` won't work because it's GET-only and this is a POST.
 >
 > Spend about half a day on a spike to confirm what event hooks the SDK exposes during a stream. **Fallback (decided):** if cards can't be sent mid-stream, stream the text and send all `proposal` events just before `done`.
+>
+> **Spike result (M7, 2026-10-26):** cards **can** be sent mid-stream: the SDK yields a `ToolResult` event as soon as a tool finishes, about 1.5 s before the closing text in the live run. The fallback isn't needed. Details and the full API check: [`spike-streaming.md`](./spike-streaming.md).
 
 **After a failed confirm (D19):** the widget shows the 409 conflicts on the card and then automatically posts a message to the conversation: `[system] Proposal {id} failed: Sony FX3 #1 is now booked by Sam 10:00–14:00. Suggest alternatives.` The bot then calls `FindOpenings` / `CheckAvailability` and replies with suggestions.
 
