@@ -69,7 +69,7 @@ class AssistantToolsTest extends TestCase
         $free = Equipment::factory()->create(['name' => 'Canon C70', 'category' => EquipmentCategory::Camera]);
         $broken = Equipment::factory()->outOfService('Bulb')->create(['name' => 'Kit B', 'category' => EquipmentCategory::Lighting]);
 
-        $result = $this->call(CheckAvailability::class, ['starts_at' => '2026-10-29T09:00', 'ends_at' => '2026-10-29T12:00']);
+        $result = $this->callTool(CheckAvailability::class, ['starts_at' => '2026-10-29T09:00', 'ends_at' => '2026-10-29T12:00']);
 
         $items = collect($result['items'])->keyBy('id');
         $this->assertTrue($result['ok']);
@@ -81,13 +81,13 @@ class AssistantToolsTest extends TestCase
         $this->assertSame('unbookable', $items[$broken->id]['state']);
         $this->assertSame('Bulb', $items[$broken->id]['reason']);
 
-        $lighting = $this->call(CheckAvailability::class, ['starts_at' => '2026-10-29T09:00', 'ends_at' => '2026-10-29T12:00', 'category' => 'lighting']);
+        $lighting = $this->callTool(CheckAvailability::class, ['starts_at' => '2026-10-29T09:00', 'ends_at' => '2026-10-29T12:00', 'category' => 'lighting']);
         $this->assertSame([$broken->id], array_column($lighting['items'], 'id'));
     }
 
     public function test_bad_arguments_come_back_as_an_error_not_an_exception()
     {
-        $result = $this->call(CheckAvailability::class, ['starts_at' => 'Tuesday', 'ends_at' => '2026-10-29T12:00']);
+        $result = $this->callTool(CheckAvailability::class, ['starts_at' => 'Tuesday', 'ends_at' => '2026-10-29T12:00']);
 
         $this->assertFalse($result['ok']);
         $this->assertSame('invalid_arguments', $result['error']);
@@ -98,7 +98,7 @@ class AssistantToolsTest extends TestCase
     {
         $this->book($this->camera, '2026-10-29 09:00', '2026-10-29 12:00');
 
-        $result = $this->call(FindOpenings::class, [
+        $result = $this->callTool(FindOpenings::class, [
             'equipment_ids' => [$this->camera->id],
             'duration_minutes' => 60,
             'search_from' => '2026-10-29T08:00',
@@ -118,13 +118,13 @@ class AssistantToolsTest extends TestCase
         $this->book($this->camera, '2026-10-30 09:00', '2026-10-30 12:00', title: 'Someone else');
         $this->book($this->camera, '2026-10-31 09:00', '2026-10-31 12:00', $this->ana, cancelled: true, title: 'Mine, cancelled');
 
-        $this->assertSame(['Mine'], array_column($this->call(ListMyBookings::class, [])['bookings'], 'title'));
-        $this->assertSame(['Mine, ended', 'Mine'], array_column($this->call(ListMyBookings::class, ['include_past' => true])['bookings'], 'title'));
+        $this->assertSame(['Mine'], array_column($this->callTool(ListMyBookings::class, [])['bookings'], 'title'));
+        $this->assertSame(['Mine, ended', 'Mine'], array_column($this->callTool(ListMyBookings::class, ['include_past' => true])['bookings'], 'title'));
     }
 
     public function test_propose_booking_stores_a_pending_proposal_and_a_card_but_saves_nothing()
     {
-        $result = $this->call(ProposeBooking::class, [
+        $result = $this->callTool(ProposeBooking::class, [
             'equipment_ids' => [$this->camera->id],
             'starts_at' => '2026-10-29T09:00',
             'ends_at' => '2026-10-29T17:00',
@@ -164,7 +164,7 @@ class AssistantToolsTest extends TestCase
         ];
 
         foreach ($cases as $code => $arguments) {
-            $result = $this->call(ProposeBooking::class, ['equipment_ids' => [$this->camera->id], 'title' => 'Shoot', ...$arguments]);
+            $result = $this->callTool(ProposeBooking::class, ['equipment_ids' => [$this->camera->id], 'title' => 'Shoot', ...$arguments]);
 
             $this->assertFalse($result['ok'], $code);
             $this->assertSame($code, $result['error'], $code);
@@ -178,9 +178,9 @@ class AssistantToolsTest extends TestCase
     {
         $samsBooking = $this->book($this->camera, '2026-10-29 09:00', '2026-10-29 12:00', title: 'Sam’s shoot');
 
-        $this->assertSame('owner_only', $this->call(ProposeChange::class, ['booking_id' => $samsBooking->id, 'title' => 'Mine now'])['error']);
-        $this->assertSame('owner_only', $this->call(ProposeCancellation::class, ['booking_id' => $samsBooking->id])['error']);
-        $this->assertSame('not_found', $this->call(ProposeCancellation::class, ['booking_id' => 999999])['error']);
+        $this->assertSame('owner_only', $this->callTool(ProposeChange::class, ['booking_id' => $samsBooking->id, 'title' => 'Mine now'])['error']);
+        $this->assertSame('owner_only', $this->callTool(ProposeCancellation::class, ['booking_id' => $samsBooking->id])['error']);
+        $this->assertSame('not_found', $this->callTool(ProposeCancellation::class, ['booking_id' => 999999])['error']);
         $this->assertDatabaseCount('booking_proposals', 0);
     }
 
@@ -188,7 +188,7 @@ class AssistantToolsTest extends TestCase
     {
         $booking = $this->book($this->camera, '2026-10-29 09:00', '2026-10-29 12:00', $this->ana, title: 'B-roll');
 
-        $result = $this->call(ProposeChange::class, [
+        $result = $this->callTool(ProposeChange::class, [
             'booking_id' => $booking->id,
             'starts_at' => '2026-10-30T09:00',
             'ends_at' => '2026-10-30T12:00',
@@ -208,8 +208,8 @@ class AssistantToolsTest extends TestCase
         $inProgress = $this->book($this->camera, '2026-10-28 10:00', '2026-10-28 17:00', $this->ana);
         $ended = $this->book($this->camera, '2026-10-27 09:00', '2026-10-27 10:00', $this->ana);
 
-        $this->assertTrue($this->call(ProposeCancellation::class, ['booking_id' => $inProgress->id])['ends_early']);
-        $this->assertSame('immutable_phase', $this->call(ProposeCancellation::class, ['booking_id' => $ended->id])['error']);
+        $this->assertTrue($this->callTool(ProposeCancellation::class, ['booking_id' => $inProgress->id])['ends_early']);
+        $this->assertSame('immutable_phase', $this->callTool(ProposeCancellation::class, ['booking_id' => $ended->id])['error']);
     }
 
     public function test_every_tool_call_is_logged_to_the_ai_channel()
@@ -217,7 +217,7 @@ class AssistantToolsTest extends TestCase
         $logger = Mockery::spy(LoggerInterface::class);
         Log::shouldReceive('channel')->with('ai')->andReturn($logger);
 
-        $this->call(ProposeCancellation::class, ['booking_id' => 999999]);
+        $this->callTool(ProposeCancellation::class, ['booking_id' => 999999]);
 
         $logger->shouldHaveReceived('info')->with('tool_call', Mockery::on(fn (array $context) => $context['tool'] === 'ProposeCancellation'
             && $context['arguments'] === ['booking_id' => 999999]
@@ -233,7 +233,7 @@ class AssistantToolsTest extends TestCase
      * @param  array<string, mixed>  $arguments
      * @return array<string, mixed>
      */
-    private function call(string $tool, array $arguments): array
+    private function callTool(string $tool, array $arguments): array
     {
         $instance = new $tool(new ToolContext($this->ana, 'conversation-1', $this->proposals));
 
