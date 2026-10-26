@@ -24,7 +24,7 @@ Steps are grouped by the PRD milestones (§12). Each step ships with the tests t
 
 | Step | Work | PRD refs |
 |---|---|---|
-| **2.1 `/who` + acting user** | `GET /who` (guests only) lists seeded users; picking one opens "Continue as X?"; `POST /who` logs in via the `web` guard (no password) and regenerates the session. `EnsureActingUser` on every route except `/who`. `GET /` redirects to `/calendar` or `/who`. `POST /switch-user` logs out, invalidates the session, returns to `/who`. A placeholder `/calendar` page so the redirect has a target until M6. | FR-AUTH-1, 2, 3 |
+| **2.1 `/who` + acting user** | `GET /who` (guests only) lists seeded users; picking one opens "Continue as X?"; `POST /who` logs in via the `web` guard (no password) and regenerates the session. Laravel's built-in `auth` middleware (guests sent to `/who`) on every route except `/who`. `GET /` redirects to `/calendar` or `/who`. `POST /switch-user` logs out, invalidates the session, returns to `/who`. A placeholder `/calendar` page so the redirect has a target until M6. | FR-AUTH-1, 2, 3 |
 | **2.2 Basic Auth gate** | Global middleware: on only when both `BASIC_AUTH_USER` and `BASIC_AUTH_PASSWORD` are set; 401 without credentials. | FR-AUTH-6, R8 |
 | **2.3 Shared layout & header** | Adapt the starter-kit shell: nav (Calendar, My bookings, Equipment) and "Acting as **Name** · Switch" on every page. Flash message display. | FR-AUTH-3, D§6 |
 
@@ -111,6 +111,8 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 3. **Docs** (`PRD.md`, `design.md`, `research.md`, `work-log.md`) are committed to the repo.
 4. **Seeders** skip any table that already has rows (fresh install only). 10 placeholder equipment items: the PRD's 7 plus 3 more.
 5. **Frontend lint/format** uses the starter kit's Vite+ (`vp check`: oxlint + oxfmt) instead of ESLint + Prettier. PRD §9.2 and §11 updated.
+6. **Acting-user middleware** is Laravel's built-in `auth` (guests redirected to `/who`), not a custom `EnsureActingUser`. PRD §9.2 updated.
+7. **Shell** uses the kit's top-header layout (matches D§6). Nav links are added in the milestone that builds each page.
 
 ## Open questions (to resolve at the step they affect)
 
