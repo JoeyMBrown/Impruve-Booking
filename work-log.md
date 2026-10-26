@@ -306,6 +306,12 @@ Please review the implementation plan inside of the root directory of this proje
 
 [4:46] WORK - Reviewed new rule engine PR CI passing, merged, continue onward.
 
+[4:51] DECISIONS -
+- Theres no navigation item to get to the manual booking page.  For now we can move forward with a temporary button that will be replaced later in M6.
+- Shadcn offers a native date/time picker that we can use without the need to grab 2 new dependencies - lets move forward with that for now and adjust later if necessary.
+
+[4:58] WORK - Run suite of commands to test new logic.  Click through new UI to verify expected behaviors and safe guards in place to prevent editing of another users booking.  Updates are happening from UI when equipment statuses are changed, can't book a piece of equipment that has already booked for a timeslot.  Can't book in the past.  Looking good so far.
+
 POST PROJECT NOTES
 - Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
 - Would love to expand on the actual business needs of the client.  Loads of assumptions were made that would've been better to iron out exact requirements via a 30 min conversation.
