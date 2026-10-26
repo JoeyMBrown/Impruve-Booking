@@ -114,4 +114,19 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Site-wide Basic Auth Gate
+    |--------------------------------------------------------------------------
+    |
+    | An optional outer gate for the whole site, in front of the placeholder
+    | "pick who you are" auth. It is on only when both values are set.
+    |
+    */
+
+    'basic_gate' => [
+        'user' => env('BASIC_AUTH_USER'),
+        'password' => env('BASIC_AUTH_PASSWORD'),
+    ],
+
 ];

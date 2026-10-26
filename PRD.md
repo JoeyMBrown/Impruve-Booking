@@ -264,7 +264,7 @@ The same rules engine (`BookingService`) is used by every save path: the form, t
 
 ### 9.2 Starter kit adaptation
 
-Start from the **official Laravel React starter kit** and keep its layout shell, shadcn setup, TypeScript and lint/format config (Vite+: oxlint + oxfmt) and Vite wiring. **Remove** login, registration, password reset, email verification, 2FA, the profile/settings pages, and the Fortify routes and views, plus the tests for all of these. Replace them with `/who`, `EnsureActingUser` and switch-user (FR-AUTH). Keep the `users.password` column (nullable) so real auth can be added later.
+Start from the **official Laravel React starter kit** and keep its layout shell, shadcn setup, TypeScript and lint/format config (Vite+: oxlint + oxfmt) and Vite wiring. **Remove** login, registration, password reset, email verification, 2FA, the profile/settings pages, and the Fortify routes and views, plus the tests for all of these. Replace them with `/who`, Laravel's built-in `auth` middleware (configured to send guests to `/who`) and switch-user (FR-AUTH). Keep the `users.password` column (nullable) so real auth can be added later.
 
 ### 9.3 Scaffold-time checks
 
