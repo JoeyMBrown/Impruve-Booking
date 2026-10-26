@@ -26,3 +26,8 @@ export type EquipmentBooking = {
     ends_at: string;
     owner: { id: number; name: string };
 };
+
+export type BookingPhase = 'upcoming' | 'in_progress' | 'ended';
+
+/** A booking that a status change would flag at risk. */
+export type ImpactedBooking = EquipmentBooking & { phase: BookingPhase };

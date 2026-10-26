@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\EquipmentStatusController;
 use App\Http\Controllers\WhoController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,6 @@ Route::middleware('auth')->group(function () {
 
     // No destroy: equipment is retired through its status, never deleted.
     Route::resource('equipment', EquipmentController::class)->except('destroy');
+    Route::put('equipment/{equipment}/status', [EquipmentStatusController::class, 'update'])->name('equipment.status');
+    Route::get('api/equipment/{equipment}/status-impact', [EquipmentStatusController::class, 'impact'])->name('api.equipment.impact');
 });

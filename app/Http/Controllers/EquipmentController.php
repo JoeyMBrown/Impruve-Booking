@@ -92,6 +92,7 @@ class EquipmentController extends Controller
                 'starts_at' => $from->toIso8601String(),
                 'ends_at' => $to->toIso8601String(),
             ],
+            'statuses' => $this->options()['statuses'],
         ]);
     }
 

@@ -1,15 +1,22 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
+import { EquipmentStatusDialog } from '@/components/equipment-status-dialog';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { dayKey, formatDateTime, formatDay, formatRange } from '@/lib/datetime';
 import { edit, index } from '@/routes/equipment';
-import type { Equipment, EquipmentBooking } from '@/types';
+import type {
+    Equipment,
+    EquipmentBooking,
+    EquipmentStatus,
+    Option,
+} from '@/types';
 
 type Props = {
     equipment: Equipment;
     bookings: EquipmentBooking[];
     window: { starts_at: string; ends_at: string };
+    statuses: Option<EquipmentStatus>[];
 };
 
 type DayGroup = { key: string; label: string; bookings: EquipmentBooking[] };
@@ -45,7 +52,12 @@ function groupByDay(
     return groups;
 }
 
-export default function EquipmentShow({ equipment, bookings, window }: Props) {
+export default function EquipmentShow({
+    equipment,
+    bookings,
+    window,
+    statuses,
+}: Props) {
     const { timezone } = usePage().props;
     const days = groupByDay(bookings, window.starts_at, timezone);
 
@@ -68,12 +80,18 @@ export default function EquipmentShow({ equipment, bookings, window }: Props) {
                         </h1>
                         <StatusBadge status={equipment.status} />
                     </div>
-                    <Button variant="outline" asChild>
-                        <Link href={edit(equipment.id)}>
-                            <Pencil />
-                            Edit
-                        </Link>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" asChild>
+                            <Link href={edit(equipment.id)}>
+                                <Pencil />
+                                Edit
+                            </Link>
+                        </Button>
+                        <EquipmentStatusDialog
+                            equipment={equipment}
+                            statuses={statuses}
+                        />
+                    </div>
                 </div>
 
                 <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">

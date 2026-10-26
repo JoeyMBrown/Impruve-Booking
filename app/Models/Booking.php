@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\BookingPhase;
 use App\Enums\BookingSource;
+use App\Enums\EquipmentStatus;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\BookingFactory;
@@ -73,6 +75,71 @@ class Booking extends Model
     {
         $query->where('bookings.starts_at', '<', CarbonImmutable::instance($to)->utc())
             ->where('bookings.ends_at', '>', CarbonImmutable::instance($from)->utc());
+    }
+
+    /**
+     * Bookings that start after now.
+     *
+     * @param  Builder<Booking>  $query
+     */
+    public function scopeUpcoming(Builder $query): void
+    {
+        $query->where('bookings.starts_at', '>', now()->utc());
+    }
+
+    /**
+     * Bookings that have started and not yet ended: start <= now < end.
+     *
+     * @param  Builder<Booking>  $query
+     */
+    public function scopeInProgress(Builder $query): void
+    {
+        $query->where('bookings.starts_at', '<=', now()->utc())
+            ->where('bookings.ends_at', '>', now()->utc());
+    }
+
+    /**
+     * Upcoming or in-progress bookings.
+     *
+     * @param  Builder<Booking>  $query
+     */
+    public function scopeNotEnded(Builder $query): void
+    {
+        $query->where('bookings.ends_at', '>', now()->utc());
+    }
+
+    /**
+     * @param  Builder<Booking>  $query
+     */
+    public function scopeUsingEquipment(Builder $query, int $equipmentId): void
+    {
+        $query->whereHas('items', fn ($items) => $items->where('equipment_id', $equipmentId));
+    }
+
+    /**
+     * Active, not ended, and at least one item is not available (FR-BK-12).
+     *
+     * @param  Builder<Booking>  $query
+     */
+    public function scopeAtRisk(Builder $query): void
+    {
+        $query->active()
+            ->notEnded()
+            ->whereHas('equipment', fn ($equipment) => $equipment->where('status', '!=', EquipmentStatus::Available));
+    }
+
+    /**
+     * Upcoming (start > now), in progress (start <= now < end) or ended (end <= now).
+     */
+    public function phase(?CarbonInterface $now = null): BookingPhase
+    {
+        $now ??= now();
+
+        return match (true) {
+            $this->starts_at->greaterThan($now) => BookingPhase::Upcoming,
+            $this->ends_at->greaterThan($now) => BookingPhase::InProgress,
+            default => BookingPhase::Ended,
+        };
     }
 
     /**
