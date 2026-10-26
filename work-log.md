@@ -1,3 +1,5 @@
+Note - Reviewed, planned, made decisions and assumptions for ~ 30 mins - 1 hour before these notes began.
+
 [23:21] WORK - Review scenario and begin to decide what to build
 
 [23:22] DECISION - Rough plan of what to build:
@@ -327,7 +329,18 @@ Please review the implementation plan inside of the root directory of this proje
 
 [5:25] BREAK - Back from break to stretch
 
-[5:36] WORK - Clicked through entire new UI sweet testing different cases, users, etc.  Attempted to break flow or surpass business constraints to no avail.
+[5:36] WORK - Clicked through entire new UI suite testing different cases, users, etc.  Attempted to break flow or surpass business constraints to no avail.
+
+[5:42] WORK - Confirmed CI passes, review PR, merged, onwards.
+
+[5:45] DECISIONS -
+- Commit findings to a root-level markdown file.  (research to determine whether confirmations can be sent mid-stream or need to be after stream)
+- A single live API run is approved, any subsequent runs need to be confirmed by me
+- Don't commit the test code, just run it, and commit the findings as a markdown file
+
+[5:55] WORK - Refresh database, run command to test streaming, run command to test streaming against real AI model.  Passed results to Claude to analyze and confirm via timestamps if pushing a confirm event mid-stream is supported by the laravel-ai SDK.
+
+
 
 POST PROJECT NOTES
 - Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
