@@ -5,6 +5,7 @@
 - User select Auth that starts as import of 14 employees names
 - AI chatbot to handle common language booking requirement
 - Light inventory CRUD to handle current and future equipment along with potential state changes
+- Waitlists and reoccuring bookings deffered for after MVP
 
 [23:27] WORK - Generate question list that I would propose to client to further alignment
 - Would google calendar, an excel spreadsheet, etc be a potential solution to the issues you're experiencing?
@@ -176,5 +177,108 @@ Take a look at the design.md document inside of this project root.  I want you t
 
 [2:02] COMMENT - For the sake of this MVP I'm concerned only with building the MVP and what makes sense for the business as it stands today, with further alignment and conversations with the client trying to build in a way that is scalable would be of much more concern to me.  Special considerations after the MVP of UI clutter, screens that display equipment lists or bookings in a readable manner become more important along with overall functionality of the application as it were to hit scale.  I'm approaching this MVP as a prototype that can be used to communicate and correct my assumptions after conversation with the client.
 
+[2:12] WORK - PRD looks good, continuing on.
+[2:12] PROMPT -
+```
+/clear
 
+Referencing the PRD.md in this projects root directory, please break the PRD into implementation steps following the
+  PRD closely.  Do not include features not included in the PRD unless you ask me first and I give the go-ahead.
+  Before writing any code let me review the implementation plan for the step you're currently on.  I have a weird
+  setup (windows 11, WSL, running docker in WSL) - so if you need any docker commands ran please give them to me and I
+  will run them manually.  Note that I do not have php, composer, etc installed locally.  I will need you to give me
+  docker commands to get laravel-sail setup locally using images that contain the tools necessary to do so (composer,
+  php, etc).  From there if you need to run any artisan commands, please give them to me and I will run those manually
+  as well.  The project is currently on it's main git branch.  Before you do any new work you need to checkout a new
+  git branch.  Please ask for permission before committing, and I will handle PR generation and merges.
+```
 
+[2:19] NOTE - I 100% have a path issue that I have been too lazy to resolve due to me setting up my dev environment way back when, and having no idea what I was doing.  Don't judge me, I work around it and pretend the problem doesn't exist like any good dev would. :)
+
+[2:25] DECISIONS - More answers from Claude convo:
+- Fast and loose with branches, one branch per milestone not per step
+- Go ahead and commit .md files to remote repo
+
+[2:27] COMMENT - Now that Claude has split the PRD into an actionable implementation plan going to iterate manually running important commands so that I can physically watch results of tests / migrations / and anything else that would be important at each step.
+
+[2:29] WORK - Claude tossed me a command that spins up a temp docker image with php and composer, to run a creation command that will create a new project using a starter kit provided by laravel that comes with our exact preferred tech stack.  It also comes with Auth pre-built, that will be stripped in favor of our auth-lite.
+
+[2:32] WORK - Scaffolded project using temp docker images.  Already have alias for sail which Claude recommended setting up - so skipping.  .env is already git ignored, sqllite default DB was removed and env updated in favor of postgres.  Next is more project initial setup, and to build frontend assets.
+
+[2:34] WORK - Install composer dependencies, build sail docker containers, ensure the containers start and remain running.\
+
+[2:40] WORK - At this point Claude is iterating step by step over the implementation plan.  Proposing commits at important intervals.  For intial project setup I'm looking over the .env, the composer.lock file, and the package.json files to confirm that all tech specifications are being used as expected.  Next is publishing package migrations for the laravel AI SDK, running migrations, and re-building frontend assets.  Ending with running PHPUnit test suite to ensure everything is green.
+
+[2:42] PROMPT -
+```
+PHP version is showing 8.5.12, Sail artisan test is showing 26 deprecations that we need to tackle before moving on, NPM install is showing 24 vulnerabilities that we also need to tackle before moving on.
+
+Pasted in deprecations and vulnerabilities to provide context
+```
+
+[2:47] WORK - Vulnerabilities and test deprecations were due to Claude grabbing the wrong version of the starter kit - oops - starting again with starter kit scaffold.
+
+[2:48] WORK - Install correct starter-kit using throwaway docker image.
+[2:48] WORK - New starter kit version offers option to hand select features, opt to remove auth here rather than in a manual step further down the implmentation plan
+[2:48] WORK - Install laravel-sail and postgres.  Build sail containers
+[2:50] WORK - Generate app key, install starter kit without auth features, publish package migrations, install npm dependencies.
+[2:52] WORK - Install laravel AI SDK, publish migrations, run migrations for app, check php version, run PHPUnit tests, verify no deprecations in test suite
+[2:54] COMMENT - At this point Claude has been tossing me sail / docker commands to scaffold the app.  The above is essentially what those commands were doing.  Small conversational back and forth between me and Claude to confirm output is as expected, correct versions are being installed, and that containers look healthy.
+
+[2:58] WORK - Have Claude commit to git now that first step is in a good spot.  Continue on building.
+[2:58] COMMENT - Mental note here that as we get closer to MVP finishing, can setup deployment environment while Claude churns to save some time.  Waiting to further in the process saves me CI / deploy time that isn't necessary now.
+
+[3:00] WORK - Claude offered an overview of step 2, waited for my OK and we are continuing on.
+[3:02] WORK - Ran command set that; removed the auth package from composer.json, re-migrates the database entirely which removed some old auth package initial config, rebuilt frontend assets, ran tests to verify no deprecations or errors from changes, ran typescript type check, ran linter.
+
+[3:05] COMMENT - Claude proposes plan for step 3.
+
+[3:08] WORK - Verify decisions:
+- Fine with explicit UTC offsets on writes, to prevent postgres from reading times in its own session timezone
+- 96-hour limit is specified in a config file and a migration check, if this needs updated later a migration will be necessary along with config change
+- Hand named constraints that will be used in later steps to recognize a conflic error by name
+
+[3:11] WORK - Migrate DB to handle new tables / models.  Ran PHPunit tests, type checks, and linter
+
+[3:13] COMMENT - Considering having Claude iterate over entire milestones and then giving me a summary to save time, as step by step is taking ages and I'm tired
+
+[13:17] PROMPT -
+```
+Go ahead and commit - can you start to iterate over entire milestones, comitting after each step?  I want a summary
+  at the end of each milestone along with a subset of commands that should be ran to verify changes like database
+  migrtations, phpunit tests, type checks, and linter runs.  If you are unable to run sail commands I can still run
+  those manually.  But if they can be held off until the end of a milestone without increased risk to code quality
+  that would be preffered.  Once hitting the end of a milestone dont create a PR, I will still do that along with
+  merges manually and we should confirm before moving on to the next milestone.
+```
+
+[13:17] DECISIONS -
+- Add 10 placeholder equipment items
+- Only run seeders if tables are empty
+- Swap to Vite+ (oxlint and oxfmt) instead of prettier and ESLint.  Serve same purpose and are already included
+
+[13:26] WORK - Run suite of commands to verify Claude changes for M1 target.  Re-migrate DB with seeders, try to seed when tables already have data, run linter formatter and test cases.  Confirmed seeders don't run a second time.
+
+[13:26] WORK - Have Claude commit outstanding changes, I'll manually PR and merge to get eyes on changes before continuing.
+[13:28] WORK - Push local branches to remote, create PRs, review, merge if CI passes. (Claude created an implmentation-plan branch and branched from that for M1, due to me asking a side question and it defaulting to that branch instead of a seperate branch off main)
+
+[13:38] WORK - New CI checks implemented in M1 all passing, look solid.  Models, controllers, seeders, factories, routes, look good.  Nothing too wild here, lot o' scaffold.  Merge PR, checkout main, checkout new feature branch to churn on M2 after confirming M2 implementation plan.
+
+[13:40] PROMPT - Time to go for M2, but lets clear context here - provide a set of instructions thats specific and can be used as a prompt for M3 and M4.
+```
+/clear
+
+Please review the implementation plan inside of the root directory of this project.  We're currently on the M2 milestone.  I want you to give me a summary of how you would implement this milestone.  Once I give confirmation go ahead and checkout a new git branch from main and start coding.  You should commit at the end of each step, and pause at the end of the milestone providing me a summary of what you wrote.  From there I want to run the usual suite of commands to ensure code quality (any migrations, linter, formatter, and tests).  Once everything is passing I will go ahead and manually create a PR and merge - which you should wait for confirmation on before doing anything else.  If you have any questions during implementation don't assume - ASK me for clarification before continuing.  Please also include a nice PR message with the summary that I can copy and paste into Github.
+```
+
+[13:48] DECISIONS -
+- Swap to a side bar for navigation as it comes out of the box
+- Hold on implementing nav links until the pages actually exist (no reason to have dead links)
+- PRD specifies an EnsureActingUser middleware, but laravel already has an existing middleware that does the exact same functionality.  Chose to just use the existing middleware instead of creating a second one with the same functionality but only a different name.
+
+[13:54] WORK - Run suite of commands to verify Claude changes for M2 target.  Re-migrate DB with seeders, run linter formatter and test cases.  Manually verified new loose auth.  Along with site wide auth specific to this take home test.
+
+POST PROJECT NOTES
+- Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
+- Would love to expand on the actual business needs of the client.  Loads of assumptions were made that would've been better to iron out exact requirements via a 30 min conversation.
+- 

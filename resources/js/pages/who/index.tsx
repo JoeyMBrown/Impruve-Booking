@@ -67,7 +67,10 @@ export default function Who({ users }: Props) {
 
                                 <DialogFooter className="gap-2">
                                     <DialogClose asChild>
-                                        <Button type="button" variant="secondary">
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                        >
                                             Cancel
                                         </Button>
                                     </DialogClose>

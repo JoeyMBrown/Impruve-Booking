@@ -10,7 +10,10 @@ export function ActingUser() {
     }
 
     return (
-        <div className="flex items-center gap-1 text-sm" data-test="acting-user">
+        <div
+            className="flex items-center gap-1 text-sm"
+            data-test="acting-user"
+        >
             <span className="text-muted-foreground">
                 <span className="hidden sm:inline">Acting as </span>
                 <strong className="font-semibold text-foreground">
