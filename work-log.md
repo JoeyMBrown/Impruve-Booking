@@ -340,7 +340,22 @@ Please review the implementation plan inside of the root directory of this proje
 
 [5:55] WORK - Refresh database, run command to test streaming, run command to test streaming against real AI model.  Passed results to Claude to analyze and confirm via timestamps if pushing a confirm event mid-stream is supported by the laravel-ai SDK.
 
+[6:04] WORK - Confirmed CI passes, review PR, merged, onwards. (this is only a markdown file commit, nothing to validate)
 
+[6:08] DECISIONS -
+- No need to add a scheduler service just for laravel sail to prune, sail is dev only so pruning can be managed manually
+- A page load should be considered a full page reload or user swap, due to the nature of Inertia in-app nav isn't a true page reload should can maintain chat history
+- Agree that aborted replies should not be stored to avoid spending tokens on replies no one will see
+- Change cards from the chat bot should offer an edit option that takes the user to a prefilled edit form for the existing booking
+
+[6:27] WORK - Tested chatbot manually giving it ambiguous requests, tasks completely unrelated to booking, and successfully booked equipment.  Also tested form edit button.  Confirmations are looking good and bot seems to be working as expected.
+
+[6:27] PROMPT -
+```
+Please update the readme to include instructions on how to run the project locally, it should include setup instructions for plugging in a new API key to get the chatbot to work as well.  It should include instructions on how to run the application locally for those that are using docker/sail, and those that aren't.
+```
+
+[6:30] WORK - Setup deployment strategy leveraging laravel cloud, setup env variables inside of laravel cloud (including anthropic key) and variables to enable site-wide http auth strictly for purposes of this being a demo site with no other auth for the public
 
 POST PROJECT NOTES
 - Manual CRUD around booking seems like overkill would be worth confirming it's necessary with client before building something that may not be needed or ever used.
