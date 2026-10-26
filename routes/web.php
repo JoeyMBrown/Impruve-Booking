@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentStatusController;
 use App\Http\Controllers\WhoController;
@@ -18,7 +19,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('switch-user', [WhoController::class, 'destroy'])->name('who.destroy');
 
-    Route::inertia('calendar', 'calendar/week')->name('calendar');
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar');
+    Route::get('api/calendar/week', [CalendarController::class, 'week'])->name('api.calendar.week');
 
     // No destroy: equipment is retired through its status, never deleted.
     Route::resource('equipment', EquipmentController::class)->except('destroy');
