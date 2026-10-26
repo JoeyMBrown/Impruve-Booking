@@ -1,12 +1,62 @@
 [
-    { "name": "Sony FX3 #1", "category": "camera", "asset_tag": "IMP-001", "description": "Full-frame cinema camera. Cage, top handle, 2 batteries, 128 GB CFexpress card." },
-    { "name": "Sony FX3 #2", "category": "camera", "asset_tag": "IMP-002", "description": "Full-frame cinema camera. No cage, 3 batteries, 64 GB CFexpress card." },
-    { "name": "Canon C70", "category": "camera", "asset_tag": "IMP-003", "description": "Super 35 cinema camera with built-in ND. 2 batteries, 2 SD cards." },
-    { "name": "Blackmagic Pocket 6K", "category": "camera", "asset_tag": "IMP-004", "description": "Super 35 camera. EF mount, 4 batteries, 1 TB SSD." },
-    { "name": "Aputure Kit A", "category": "lighting", "asset_tag": "IMP-005", "description": "3-point kit: 2x 300d, 1x 120d, softboxes and stands." },
-    { "name": "Aputure Kit B", "category": "lighting", "asset_tag": "IMP-006", "description": "3-point kit: 2x 300d, 1x 120d, softboxes and stands." },
-    { "name": "Godox Kit", "category": "lighting", "asset_tag": "IMP-007", "description": "2x SL60W with umbrellas and stands. Lightweight, good for travel." },
-    { "name": "Nanlite Tube Kit", "category": "lighting", "asset_tag": "IMP-008", "description": "4x PavoTube II 15C RGB tubes with batteries and clamps." },
-    { "name": "Podcast Room", "category": "space", "asset_tag": null, "description": "Sound-treated room with 4 mics, a RodeCaster Pro and 2 cameras on fixed mounts." },
-    { "name": "Studio B", "category": "space", "asset_tag": null, "description": "Small studio with a white cyc wall and a ceiling light grid." }
+    {
+        "name": "Sony FX3 #1",
+        "category": "camera",
+        "asset_tag": "IMP-001",
+        "description": "Full-frame cinema camera. Cage, top handle, 2 batteries, 128 GB CFexpress card."
+    },
+    {
+        "name": "Sony FX3 #2",
+        "category": "camera",
+        "asset_tag": "IMP-002",
+        "description": "Full-frame cinema camera. No cage, 3 batteries, 64 GB CFexpress card."
+    },
+    {
+        "name": "Canon C70",
+        "category": "camera",
+        "asset_tag": "IMP-003",
+        "description": "Super 35 cinema camera with built-in ND. 2 batteries, 2 SD cards."
+    },
+    {
+        "name": "Blackmagic Pocket 6K",
+        "category": "camera",
+        "asset_tag": "IMP-004",
+        "description": "Super 35 camera. EF mount, 4 batteries, 1 TB SSD."
+    },
+    {
+        "name": "Aputure Kit A",
+        "category": "lighting",
+        "asset_tag": "IMP-005",
+        "description": "3-point kit: 2x 300d, 1x 120d, softboxes and stands."
+    },
+    {
+        "name": "Aputure Kit B",
+        "category": "lighting",
+        "asset_tag": "IMP-006",
+        "description": "3-point kit: 2x 300d, 1x 120d, softboxes and stands."
+    },
+    {
+        "name": "Godox Kit",
+        "category": "lighting",
+        "asset_tag": "IMP-007",
+        "description": "2x SL60W with umbrellas and stands. Lightweight, good for travel."
+    },
+    {
+        "name": "Nanlite Tube Kit",
+        "category": "lighting",
+        "asset_tag": "IMP-008",
+        "description": "4x PavoTube II 15C RGB tubes with batteries and clamps."
+    },
+    {
+        "name": "Podcast Room",
+        "category": "space",
+        "asset_tag": null,
+        "description": "Sound-treated room with 4 mics, a RodeCaster Pro and 2 cameras on fixed mounts."
+    },
+    {
+        "name": "Studio B",
+        "category": "space",
+        "asset_tag": null,
+        "description": "Small studio with a white cyc wall and a ceiling light grid."
+    }
 ]
