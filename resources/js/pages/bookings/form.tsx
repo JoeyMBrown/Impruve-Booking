@@ -41,6 +41,8 @@ import type {
 type Props = {
     booking: EditableBooking | null;
     values: BookingFormValues;
+    /** Prefilled from a chat proposal's "Edit in form" (FR-FORM-4). */
+    from_proposal: boolean;
     availability: ItemAvailability[];
     categories: Option<EquipmentCategory>[];
     limits: { slot_minutes: number; max_duration_hours: number };
@@ -49,6 +51,7 @@ type Props = {
 export default function BookingForm({
     booking,
     values,
+    from_proposal: fromProposal,
     availability: initialAvailability,
     categories,
     limits,
@@ -186,6 +189,15 @@ export default function BookingForm({
                 <h1 className="text-xl font-semibold tracking-tight">
                     {heading}
                 </h1>
+
+                {fromProposal && (
+                    <Alert>
+                        <AlertDescription>
+                            From your chat request: review and{' '}
+                            {booking ? 'save' : 'book'}.
+                        </AlertDescription>
+                    </Alert>
+                )}
 
                 {inProgress && (
                     <Alert>

@@ -14,8 +14,10 @@ use App\Enums\BookingPhase;
 use App\Enums\BookingSource;
 use App\Enums\EquipmentCategory;
 use App\Enums\EquipmentStatus;
+use App\Enums\ProposalAction;
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
+use App\Models\BookingProposal;
 use App\Models\Equipment;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -41,10 +43,17 @@ class BookingController extends Controller
 
     /**
      * The booking form, optionally prefilled from a calendar slot or an
-     * equipment page: ?starts_at=&ends_at=&equipment[]=
+     * equipment page (?starts_at=&ends_at=&equipment[]=), or from a chat
+     * proposal's "Edit in form" (?proposal={uuid}).
      */
     public function create(Request $request): Response
     {
+        $proposal = $this->proposalFor($request, ProposalAction::Create);
+
+        if ($proposal !== null) {
+            return $this->renderForm(null, $this->valuesFromProposal($proposal), fromProposal: true);
+        }
+
         $startsAt = $this->parseOrNull($request->string('starts_at')->toString())
             ?? SlotClock::ceil(SlotClock::now());
         $endsAt = $this->parseOrNull($request->string('ends_at')->toString());
@@ -55,23 +64,19 @@ class BookingController extends Controller
 
         /** @var list<int|string> $requested */
         $requested = (array) $request->query('equipment', []);
-        $equipmentIds = Equipment::query()
+        $equipmentIds = array_values(Equipment::query()
             ->whereIn('id', array_map(intval(...), $requested))
             ->where('status', '!=', EquipmentStatus::Retired)
             ->pluck('id')
-            ->all();
+            ->map(fn ($id) => (int) $id)
+            ->all());
 
-        return Inertia::render('bookings/form', [
-            'booking' => null,
-            'values' => [
-                'starts_at' => SlotClock::local($startsAt)->format(self::FORM_TIME_FORMAT),
-                'ends_at' => SlotClock::local($endsAt)->format(self::FORM_TIME_FORMAT),
-                'equipment_ids' => $equipmentIds,
-                'title' => '',
-                'notes' => '',
-            ],
-            'availability' => $this->availabilityFor($startsAt, $endsAt),
-            ...$this->formOptions(),
+        return $this->renderForm(null, [
+            'starts_at' => SlotClock::local($startsAt)->format(self::FORM_TIME_FORMAT),
+            'ends_at' => SlotClock::local($endsAt)->format(self::FORM_TIME_FORMAT),
+            'equipment_ids' => $equipmentIds,
+            'title' => '',
+            'notes' => '',
         ]);
     }
 
@@ -92,7 +97,7 @@ class BookingController extends Controller
      * The same form for the owner's booking. An in-progress booking opens in
      * a restricted mode where only the end can move (or End now).
      */
-    public function edit(Booking $booking): Response|RedirectResponse
+    public function edit(Request $request, Booking $booking): Response|RedirectResponse
     {
         Gate::authorize('update', $booking);
 
@@ -105,24 +110,79 @@ class BookingController extends Controller
         }
 
         $draft = BookingDraft::fromBooking($booking);
+        $proposal = $this->proposalFor($request, ProposalAction::Update, $booking);
 
-        return Inertia::render('bookings/form', [
-            'booking' => [
+        return $this->renderForm(
+            [
                 'id' => $booking->id,
                 'title' => $booking->title,
                 'phase' => $phase,
                 'ends_now_at' => $booking->ends_at->min(SlotClock::nextSlotAfter(SlotClock::now()))->toIso8601String(),
             ],
-            'values' => [
+            $proposal !== null ? $this->valuesFromProposal($proposal) : [
                 'starts_at' => SlotClock::local($booking->starts_at)->format(self::FORM_TIME_FORMAT),
                 'ends_at' => SlotClock::local($booking->ends_at)->format(self::FORM_TIME_FORMAT),
                 'equipment_ids' => $draft->equipmentIds,
                 'title' => $booking->title,
                 'notes' => $booking->notes ?? '',
             ],
-            'availability' => $this->availabilityFor($booking->starts_at, $booking->ends_at, $booking->id),
+            ignoreBookingId: $booking->id,
+            fromProposal: $proposal !== null,
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $booking
+     * @param  array{starts_at: string, ends_at: string, equipment_ids: list<int>, title: string, notes: string}  $values
+     */
+    private function renderForm(?array $booking, array $values, ?int $ignoreBookingId = null, bool $fromProposal = false): Response
+    {
+        return Inertia::render('bookings/form', [
+            'booking' => $booking,
+            'values' => $values,
+            'from_proposal' => $fromProposal,
+            'availability' => $this->availabilityFor(
+                SlotClock::parse($values['starts_at']),
+                SlotClock::parse($values['ends_at']),
+                $ignoreBookingId,
+            ),
             ...$this->formOptions(),
         ]);
+    }
+
+    /**
+     * The acting user's own proposal named in ?proposal=, for "Edit in form"
+     * on a chat card. Anyone else's (or an unknown id) is ignored.
+     */
+    private function proposalFor(Request $request, ProposalAction $action, ?Booking $booking = null): ?BookingProposal
+    {
+        if (! $request->filled('proposal')) {
+            return null;
+        }
+
+        return BookingProposal::query()
+            ->whereKey($request->string('proposal')->toString())
+            ->where('user_id', $this->actor($request)->id)
+            ->where('action', $action)
+            ->when($booking, fn ($query, Booking $booking) => $query->where('booking_id', $booking->id))
+            ->first();
+    }
+
+    /**
+     * @return array{starts_at: string, ends_at: string, equipment_ids: list<int>, title: string, notes: string}
+     */
+    private function valuesFromProposal(BookingProposal $proposal): array
+    {
+        /** @var array{equipment_ids: list<int>, starts_at: string, ends_at: string, title: string, notes: string|null} $payload */
+        $payload = $proposal->payload;
+
+        return [
+            'starts_at' => SlotClock::local(CarbonImmutable::parse($payload['starts_at']))->format(self::FORM_TIME_FORMAT),
+            'ends_at' => SlotClock::local(CarbonImmutable::parse($payload['ends_at']))->format(self::FORM_TIME_FORMAT),
+            'equipment_ids' => $payload['equipment_ids'],
+            'title' => $payload['title'],
+            'notes' => $payload['notes'] ?? '',
+        ];
     }
 
     public function update(BookingRequest $request, Booking $booking): RedirectResponse
