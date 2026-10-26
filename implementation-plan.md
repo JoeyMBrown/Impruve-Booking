@@ -16,7 +16,7 @@ Steps are grouped by the PRD milestones (§12). Each step ships with the tests t
 | **1.2 Strip starter-kit auth** | Remove login, registration, password reset, email verification, 2FA, profile/settings pages, Fortify routes/views/config, and their tests. Keep the layout shell, shadcn, TS/ESLint/Prettier, Vite. Make `users.email` and `users.password` nullable. | §9.2, FR-AUTH-5 |
 | **1.3 Config, enums, migrations, models** | `config/booking.php` (timezone `America/Chicago`, 30-min slot, 96 h max, 15-min grace, chat limits, proposal expiry; env-overridable where the PRD says configurable). Enums: `EquipmentCategory`, `EquipmentStatus`, `BookingSource`, `ProposalAction`, `ProposalStatus`. Migrations: `equipment`, `bookings` (CHECK constraints), `booking_items` (`btree_gist`, composite cascading FK, exclusion constraint, all as raw `DB::statement`), `booking_proposals`. Eloquent models, relationships and factories. | §7.2 FR-EQ-1/3, §7.3, Q1/Q2/Q4, D§2.2 |
 | **1.4 Placeholder seeders** | `database/seeders/data/users.json` (14) and `equipment.json` (~10 placeholders: Sony FX3 #1/#2, Canon C70, Aputure Kit A/B, Godox Kit, Podcast Room, …). Seeders for a fresh install only. | §9.4, R7 |
-| **1.5 Code quality + CI** | Add Larastan (moderate level) and confirm Pint config. GitHub Actions workflow with three jobs: **php-quality** (Pint `--test`, Larastan), **php-tests** (Postgres service, migrate, PHPUnit), **frontend** (`npm ci`, `tsc --noEmit`, ESLint, Prettier check, `npm run build`). Runs on PRs and pushes to `main`. CI green. | §11, R12, R13 |
+| **1.5 Code quality + CI** | Add Larastan (moderate level) and confirm Pint config. GitHub Actions workflow with three jobs: **php-quality** (Pint `--test`, Larastan), **php-tests** (Postgres service, migrate, PHPUnit), **frontend** (`npm ci`, `npm run build`, `tsc --noEmit`, `vp check` lint + format). Runs on PRs and pushes to `main`. CI green. | §11, R12, R13 |
 
 **M1 done when:** starter kit without auth runs in Sail on Postgres + PHP 8.5, migrations with constraints apply, seeders load, CI is green.
 
@@ -109,9 +109,10 @@ Tests: calendar + week JSON shapes, filters, overlap-the-week inclusion, My book
 1. **Branches:** one branch per milestone (e.g. `m1-scaffold`).
 2. **Equipment list "Next booking" column** (D§6.6 wireframe): not built. Follow the PRD (FR-EQ-5).
 3. **Docs** (`PRD.md`, `design.md`, `research.md`, `work-log.md`) are committed to the repo.
+4. **Seeders** skip any table that already has rows (fresh install only). 10 placeholder equipment items: the PRD's 7 plus 3 more.
+5. **Frontend lint/format** uses the starter kit's Vite+ (`vp check`: oxlint + oxfmt) instead of ESLint + Prettier. PRD §9.2 and §11 updated.
 
 ## Open questions (to resolve at the step they affect)
 
-1. *(At 1.4)* How strictly to enforce "fresh install only" for seeders.
-2. *(At 7.2)* Where to write the spike decision.
-3. *(At 8.7)* How to run the scheduler under Sail (dedicated container vs. a manual `schedule:work`).
+1. *(At 7.2)* Where to write the spike decision.
+2. *(At 8.7)* How to run the scheduler under Sail (dedicated container vs. a manual `schedule:work`).
