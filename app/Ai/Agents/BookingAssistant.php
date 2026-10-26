@@ -3,11 +3,16 @@
 namespace App\Ai\Agents;
 
 use App\Ai\BookingAssistantPrompt;
+use App\Ai\Tools\CheckAvailability;
+use App\Ai\Tools\FindOpenings;
+use App\Ai\Tools\ListMyBookings;
+use App\Ai\Tools\ToolContext;
 use App\Models\User;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
+use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 
 /**
@@ -27,11 +32,20 @@ class BookingAssistant implements Agent, Conversational, HasTools
     }
 
     /**
-     * @return list<object>
+     * Read-only tools. Each gets the acting user from the session, never as
+     * an argument the model could set.
+     *
+     * @return list<Tool>
      */
     public function tools(): iterable
     {
-        return [];
+        $context = new ToolContext($this->user, $this->currentConversation());
+
+        return [
+            new CheckAvailability($context),
+            new FindOpenings($context),
+            new ListMyBookings($context),
+        ];
     }
 
     public function provider(): string
